@@ -1,0 +1,14 @@
+FROM alpine:latest
+
+ENV FLASK_APP python3_simple_http_server.py
+ENV FLASK_HOST 0.0.0.0
+ENV FLASK_PORT 8000
+
+# Install Python3
+RUN apk add python3 py3-pip
+RUN pip3 install flask
+
+COPY python-prototype/python3_simple_http_server.py /python3_simple_http_server.py
+
+#CMD python3 /python3_simple_http_server.py 8000
+CMD flask run -h $FLASK_HOST -p $FLASK_PORT

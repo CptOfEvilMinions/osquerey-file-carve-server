@@ -1,0 +1,4 @@
+conf/nginx/tls/*
+conf/osquery/osquery.key
+osquery-file-carve-server
+__pycache__

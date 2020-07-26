@@ -1,0 +1,16 @@
+FROM golang:alpine3.12 as build
+
+RUN mkdir -p /app/conf
+
+COPY go.mod /app/go.mod
+COPY go.sum /app/go.sum
+COPY main.go /app/main.go
+COPY conf/osquery-file-carve.yml /app/conf/osquery-file-carve.yml
+COPY pkg/ /app/pkg
+
+WORKDIR /app
+
+RUN go install
+RUN go build -o main .
+
+CMD ["/app/main"]
