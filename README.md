@@ -13,6 +13,14 @@
 ## Tested Osquery versions
 * `osquery version 4.3.0` 
 
+## To do
+* Add an API to download files
+* Add LDAP auth to API
+* Add MongoDB GridFS support for file storage
+* Add logging
+* TravisCI build
+* UML/network diagram
+
 ## Refernces
 
 ### net/http
