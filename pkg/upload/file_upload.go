@@ -6,43 +6,19 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"sync"
 	"time"
 )
 
-// FilCarveSession struct to track state and data of file carve session
-type FilCarveSession struct {
-	Timestamp   time.Time
-	blockData   map[int]string
-	totalBlocks int
-	lastBlock   int
-	CarveID     string
-}
-
-// FileCarveBlock struct for incoming file carve block
-type FileCarveBlock struct {
-	BlockID   int    `json:"block_id"`
-	SessionID string `json:"session_id"`
-	RequestID string `json:"request_id"`
-	BlockData string `json:"data"`
-}
-
-// FileCarveSessionMap Map of FilCarveSession structs
-var FileCarveSessionMap = make(map[string]*FilCarveSession)
-
-// Mutex for FileCarveSessionMap
-var Mutex = &sync.Mutex{}
-
-// UploadFileCarve takes in file carve data blocks and processes them
+// UploadFileCarveToDisk takes in file carve data blocks and processes them
 //https://www.alexedwards.net/blog/how-to-properly-parse-a-json-request-body
-func UploadFileCarve(w http.ResponseWriter, r *http.Request) {
+func UploadFileCarveToDisk(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("######################################### Uploading Block #########################################")
 	// Declare a new FileCarveBlock obj
 	var fileCarveBlock FileCarveBlock
 
 	// Try to decode the request body into the struct. If there is an error,
 	// respond to the client with the error message and a 400 status code.
-	err := json.NewDecoder(r.Body).Decode(&fileCarveBlock)
+	err := json.NewDecoder(r.Body).Decode(fileCarveBlock)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -98,7 +74,7 @@ func UploadFileCarve(w http.ResponseWriter, r *http.Request) {
 
 func writeDataToFile(fileCarveSession *FilCarveSession, w http.ResponseWriter) {
 	fmt.Println("######################################### Creaete file #########################################")
-	outFileName := "/tmp/" + fileCarveSession.CarveID + ".tar"
+	outFileName := fmt.Sprintf("%s/%s.tar", "/tmp", fileCarveSession.CarveID)
 	fmt.Println(outFileName)
 
 	// Create file

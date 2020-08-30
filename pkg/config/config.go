@@ -16,6 +16,21 @@ type Config struct {
 	Webserver struct {
 		Port int `yaml:"port"`
 	} `yaml:"Webserver"`
+	Storage struct {
+		File struct {
+			Enabled  bool   `yaml:"enabled"`
+			Location string `yaml:"location"`
+		} `yaml:"File"`
+		Mongo struct {
+			Enabled  bool   `yaml:"enabled"`
+			Host     string `yaml:"host"`
+			Port     int    `yaml:"port"`
+			PoolSize uint64 `yaml:"pool_size"`
+			Database string `yaml:"database"`
+			Username string `yaml:"username"`
+			Password string `yaml:"password"`
+		} `yaml:"Mongo"`
+	} `yaml:"Storage"`
 }
 
 // NewConfig returns a new decoded Config struct

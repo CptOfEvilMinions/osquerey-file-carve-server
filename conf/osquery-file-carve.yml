@@ -5,12 +5,14 @@ Webserver:
   port: 8000
 Storage:
   File:
-    enabled: true
+    enabled: false
     location: '/tmp'
   Mongo:
     enabled: true
-    host: 'localhost'
+    host: 'mongo'
+    port: 27017
+    pool_size: 5
     database: 'osquery-file-carve'
-    username: 'mongo'
-    password: 'mongo'
+    #username: 'mongo'
+    #password: 'mongo'
     

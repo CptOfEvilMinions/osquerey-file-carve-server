@@ -3,6 +3,7 @@ package upload
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -11,11 +12,10 @@ import (
 
 // Generate a UUID 4 as a sessionID
 func generateSessionID() string {
-	sessionID := guuid.New()
-	return fmt.Sprintf("%s", sessionID)
+	return fmt.Sprintf("%s", guuid.New())
 }
 
-type FileCarve struct {
+type fileCarve struct {
 	BlockCount int    `json:"block_count"`
 	BlockSize  int    `json:"block_size"`
 	CarveSize  int    `json:"carve_size"`
@@ -33,7 +33,7 @@ func StartFileCarve(w http.ResponseWriter, r *http.Request) {
 	Mutex.Lock()
 
 	// Declare a new StartFileCarve obj
-	var startFileCarve FileCarve
+	var startFileCarve fileCarve
 
 	// Try to decode the request body into the struct. If there is an error,
 	// respond to the client with the error message and a 400 status code.
@@ -46,6 +46,7 @@ func StartFileCarve(w http.ResponseWriter, r *http.Request) {
 	// Generate sessionID
 	sessionID := generateSessionID()
 	fmt.Println(sessionID)
+	log.Println(sessionID)
 
 	// Add sessionID to map
 	FileCarveSessionMap[sessionID] = &FilCarveSession{
