@@ -42,7 +42,7 @@ func setupRoutes(cfg *config.Config) {
 
 	} else {
 		log.Printf("[+] - Writing file uploads to disk")
-		http.HandleFunc("/upload_blocks", upload.UploadFileCarveToDisk)
+		http.HandleFunc("/upload_blocks", upload.FileCarveToDisk)
 	}
 
 	// If env debug listen on localhost and load SSL certs

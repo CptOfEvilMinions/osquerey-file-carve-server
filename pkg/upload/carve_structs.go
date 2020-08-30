@@ -1,17 +1,22 @@
 package upload
 
 import (
+	"os"
 	"sync"
 	"time"
+
+	"go.mongodb.org/mongo-driver/mongo/gridfs"
 )
 
 // FilCarveSession struct to track state and data of file carve session
 type FilCarveSession struct {
-	Timestamp   time.Time
-	blockData   map[int]string
-	totalBlocks int
-	lastBlock   int
-	CarveID     string
+	Timestamp         time.Time
+	blockData         map[int]string
+	totalBlocks       int
+	lastBlockReceived int
+	CarveID           string
+	MongoUploadStream *gridfs.UploadStream
+	FileStream        *os.File
 }
 
 // FileCarveBlock struct for incoming file carve block

@@ -1,18 +1,28 @@
 #!/bin/bash
 
+
+# Check if test file exists
 # Download test file
 test_file_url="http://ipv4.download.thinkbroadband.com/50MB.zip"
-if [ ! -f /tmp/50MB.zip ]; then
+if [ ! -f /tmp/test_file_50MB.zip ]; then
   echo '[-] - Test file does NOT exist - Start download'
-  curl ${test_file_url} --output /tmp/50MB.zip
+  curl ${test_file_url} --output /tmp/test_file_50MB.zip
+  chmod 444 /tmp/test_file_50MB.zip
 fi
 
-# Generate test file SHA256 hash
-test_file_sha256=`openssl dgst -sha256 /tmp/50MB.zip | awk '{print $2}'`
+# Make copy of data for upload
+if [ ! -f /tmp/50MB.zip ]; then
+  cp /tmp/test_file_50MB.zip /tmp/50MB.zip
+  echo '[*] - Creating copy of test file'
+  chmod 644 /tmp/50MB.zip
+fi
 
+
+# Generate test file SHA256 hash
+test_file_sha256=`openssl dgst -sha256 /tmp/test_file_50MB.zip | awk '{print $2}'`
 
 # Start server and background the proc
-ENV=debug ./osquery-file-carve-server &
+ENV=debug ./osquery-file-carve-server --config conf/osquery-file-carve-dev.yml &
 server_proc_id=`ps aux | grep osquery-file-carve-server | grep -v 'grep' | awk '{print $2}'`
 
 echo "[*] - osquery-file-carve-server process ID: ${server_proc_id}"

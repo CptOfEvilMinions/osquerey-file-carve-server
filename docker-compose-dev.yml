@@ -1,0 +1,93 @@
+version: '2.2'
+services: 
+  # ######################################################### NGINX #########################################################
+  # nginx:
+  #   build: 
+  #     context: .
+  #     dockerfile: docker/Dockerfile-nginx
+  #   container_name: 'nginx'
+  #   restart: unless-stopped
+  #   ports: 
+  #     - 8000:80
+  #     - 8443:443
+  #   networks: 
+  #     - default
+  #     - file-carve-backend
+  #     - kolide-backend
+
+  # ######################################################### Kolide #########################################################
+  # kolide:
+  #   build: 
+  #     context: .
+  #     dockerfile: docker/Dockerfile-kolide
+  #   restart: unless-stopped
+  #   volumes: 
+  #     - kolide-logs:/var/log/osquery
+  #   networks: 
+  #     - kolide-backend
+  #   depends_on:
+  #     - mysql
+  #     - redis
+  
+  # ######################################################### MySQL #########################################################
+  # mysql:
+  #   build: 
+  #     context: .
+  #     dockerfile: docker/Dockerfile-mysql
+  #   container_name: kolide-mysql
+  #   restart: unless-stopped
+  #   environment: 
+  #     MYSQL_ROOT_PASSWORD: kolide
+  #     MYSQL_DATABASE: kolide
+  #     MYSQL_USER: kolide
+  #     MYSQL_PASSWORD: kolide
+  #   volumes: 
+  #     - kolide-mysql:/var/lib/mysql
+  #   networks: 
+  #     - kolide-backend
+
+  # ######################################################### Redis #########################################################
+  # redis:
+  #   image: redis:latest
+  #   container_name: kolide-redis
+  #   restart: unless-stopped
+  #   networks: 
+  #     - kolide-backend 
+  #   volumes: 
+  #     - kolide-redis:/data
+
+
+  # ######################################################### osquery-file-carve-server #########################################################
+  # osquery-file-carve-server:
+  #   build: 
+  #     context: .
+  #     dockerfile: docker/Dockerfile-osquery-file-carve-server
+  #   container_name: 'osquery-file-carve-server'
+  #   restart: 'unless-stopped'
+  #   networks: 
+  #     - file-carve-backend
+  #   depends_on: 
+  #     - mongo
+
+  ######################################################### MongoDB #########################################################
+  mongo:
+    image: mongo:4.4.0-bionic
+    container_name: 'file-carve-mongo'
+    restart: unless-stopped
+    volumes:  
+      - file-carve-mongo:/data/db
+    ports:
+      - 27017:27017
+    networks: 
+      - default
+      - file-carve-backend
+
+networks:
+  kolide-backend:
+  file-carve-backend:
+
+volumes: 
+  kolide-logs:
+  kolide-redis:
+  kolide-mysql:
+  file-carve-mongo:

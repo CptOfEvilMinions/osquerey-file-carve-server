@@ -76,10 +76,7 @@ services:
     restart: unless-stopped
     volumes:  
       - file-carve-mongo:/data/db
-    ports:
-      - 27017:27017
     networks: 
-      - default
       - file-carve-backend
 
 networks:

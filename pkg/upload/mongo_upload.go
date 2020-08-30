@@ -50,35 +50,31 @@ func UploadFileCarveToMongo(w http.ResponseWriter, r *http.Request, mongoBucketC
 	// Declare a new FileCarveBlock obj
 	var fileCarveBlock FileCarveBlock
 
-	// Try to decode the request body into the struct. If there is an error,
-	// respond to the client with the error message and a 400 status code.
-	err := json.NewDecoder(r.Body).Decode(&fileCarveBlock)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	// Decode JSON blob to fileCarveBlock obj
+	JSONDecode(w, r.Body, &fileCarveBlock)
+
+	// Check if Sesssion ID exists.
+	result := CheckSessionIDexists(fileCarveBlock.SessionID, FileCarveSessionMap)
+	if result == false {
+		http.Error(w, "Session ID does not exist", http.StatusBadRequest)
 		return
 	}
 
-	// Check if Sesssion ID exists, if not return 404
-	// https://www.quora.com/In-Go-how-do-I-use-a-map-with-a-string-key-and-a-struct-as-value
-	// https://stackoverflow.com/questions/2050391/how-to-check-if-a-map-contains-a-key-in-go
-	if _, exist := FileCarveSessionMap[fileCarveBlock.SessionID]; !exist {
-		for k := range FileCarveSessionMap {
-			fmt.Println(k)
-		}
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	// Create uploadStream
+	mongoUploadStream := createMongoUploadStream(mongoBucketConnector)
 
-	// LOCK Mutex
+	////////////////////////////////////////////// LOCK Mutex //////////////////////////////////////////////
 	// Add block to map
 	// Set last block
 	Mutex.Lock()
 	FileCarveSessionMap[fileCarveBlock.SessionID].Timestamp = time.Now()
-	FileCarveSessionMap[fileCarveBlock.SessionID].lastBlock = fileCarveBlock.BlockID
-	FileCarveSessionMap[fileCarveBlock.SessionID].blockData[fileCarveBlock.BlockID] = fileCarveBlock.BlockData
+	FileCarveSessionMap[fileCarveBlock.SessionID].lastBlockReceived = fileCarveBlock.BlockID
+	FileCarveSessionMap[fileCarveBlock.SessionID].MongoUploadStream = mongoUploadStream
+	//FileCarveSessionMap[fileCarveBlock.SessionID].blockData[fileCarveBlock.BlockID] = fileCarveBlock.BlockData
 	Mutex.Unlock()
+	////////////////////////////////////////////// LOCK Mutex //////////////////////////////////////////////
 
-	// Check if received if received all data blocks
+	// Check if all data blocks were received
 	if len(FileCarveSessionMap[fileCarveBlock.SessionID].blockData) < FileCarveSessionMap[fileCarveBlock.SessionID].totalBlocks {
 		w.WriteHeader(200)
 		w.Header().Set("Content-Type", "application/json")
@@ -103,6 +99,24 @@ func UploadFileCarveToMongo(w http.ResponseWriter, r *http.Request, mongoBucketC
 	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
+
+}
+
+func createMongoUploadStream(mongoBucketConnector *gridfs.Bucket) *gridfs.UploadStream {
+	// Create uploadStream
+	uploadStream, err := mongoBucketConnector.OpenUploadStream("filename")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Defer closing stream unless there is an error
+	defer func() {
+		if err = uploadStream.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	return uploadStream
 
 }
 

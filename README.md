@@ -4,6 +4,17 @@
 1. `cd osquery-file-carve-server/`
 1. `go mod init github.com/CptOfEvilMinions/osquery-file-carve-server`
 
+## Assumptions
+* All blocks of data sent by Osquery will arrive in order
+* All data block sizes have appropriate settings
+
+
+
+## Setup
+### Block size configuration
+The default setting for all the configs in this repo is to set the data block size at 10MB (10000000 bytes). Osquery has `carver_block_size` set to 10000000 (10MB), NGINX has `client_max_body_size` set to `15MB` for TCP and TLS overhead, and Mongo GridFS blocksize is set to `10MB`.
+* Mongo GridFS blockstore has chunk size/block size set to `255K` by default.
+
 ## Spin up Kolide stack
 1. `openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout conf/nginx/tls/snakeoil.key -out conf/nginx/tls/snakeoil.crt`
 1. ``
@@ -22,13 +33,12 @@
 * UML/network diagram
 
 ## Refernces
-
 ### NGINX
 * [StackOverFlow - nginx not blocking user agents](https://serverfault.com/questions/480492/nginx-not-blocking-user-agents)
 * [StackOverFlow - Nginx: location regex for multiple paths](https://serverfault.com/questions/564127/nginx-location-regex-for-multiple-paths)
 * [Github - CptOfEvilMinions/BlogProjects](https://github.com/CptOfEvilMinions/BlogProjects/tree/master/kolide-mutual-tls)
 
-### Mongo + GriFS
+### Mongo + GridFS
 * [GoDocs - package gridfs](https://godoc.org/go.mongodb.org/mongo-driver/mongo/gridfs#Bucket.OpenUploadStream)
 * [Golang+MongoDB](https://blog.csdn.net/qq_25490573/article/details/103540311)
 * [GoDocs - package mongo](https://godoc.org/go.mongodb.org/mongo-driver/mongo)
@@ -40,6 +50,12 @@
 * []()
 * []()
 * []()
+
+### File I/O
+* [StackOverFlow - How to read/write from/to file using Go?](https://stackoverflow.com/questions/1821811/how-to-read-write-from-to-file-using-go)
+* [StackOverFlow - Getting “bytes.Buffer does not implement io.Writer” error message](https://stackoverflow.com/questions/23454940/getting-bytes-buffer-does-not-implement-io-writer-error-message)
+* [GoDocs - Package io](https://golang.org/pkg/io/)
+* [Streaming IO in Go](https://medium.com/learning-the-go-programming-language/streaming-io-in-go-d93507931185)
 
 ### net/http
 * [Format a Go string without printing?](https://stackoverflow.com/questions/11123865/format-a-go-string-without-printing)
