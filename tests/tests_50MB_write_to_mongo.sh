@@ -22,7 +22,7 @@ fi
 test_file_sha256=`openssl dgst -sha256 /tmp/test_file_50MB.zip | awk '{print $2}'`
 
 # Start server and background the proc
-ENV=debug ./osquery-file-carve-server --config conf/osquery-file-carve-dev-disk.yml &
+ENV=debug ./osquery-file-carve-server --config conf/osquery-file-carve-dev-mongo.yml &
 server_proc_id=`ps aux | grep osquery-file-carve-server | grep -v 'grep' | awk '{print $2}'`
 
 echo "[*] - osquery-file-carve-server process ID: ${server_proc_id}"

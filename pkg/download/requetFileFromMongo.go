@@ -5,9 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/config"
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,15 +16,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/gridfs"
 )
-
-// FileRequest
-type FileRequest struct {
-	FileCarveGUID string `json:"file_carve_guid"`
-}
-
-type nope struct {
-	FileCarveGUID string `json:"file_carve_guid"`
-}
 
 // retrieveFile checks if the file by GGUID exists in Mongo.
 // If it exists it returns result and nil, if not returns nil and err
@@ -41,6 +33,20 @@ func retrieveFile(fileCarveGUIDgo string, mongoCollection *mongo.Collection) (pr
 		return result, nil
 	}
 	return nil, err
+}
+
+func checkMongoDocExists(fileCarveGUID string, mongoCollection *mongo.Collection) bool {
+	// Generate filter to search for document
+	mongoFilter := bson.M{"filename": fileCarveGUID}
+
+	// Search for document
+	// If error is nil a document was found
+	// Else return false
+	var result bson.M
+	if err := mongoCollection.FindOne(context.Background(), mongoFilter).Decode(&result); err == nil {
+		return true
+	}
+	return false
 }
 
 // FileRequestFromMongo this function will take in download requests
@@ -62,19 +68,11 @@ func FileRequestFromMongo(w http.ResponseWriter, r *http.Request, cfg *config.Co
 	mongoCollection := db.Collection("fs.files")
 
 	// Check file exists
-	// If file does NOT exist return error to user
-	result, err := retrieveFile(fileRequest.FileCarveGUID, mongoCollection)
-	if err != nil {
+	if result := checkMongoDocExists(fileRequest.FileCarveGUID, mongoCollection); result == false {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	// Print result
-	fmt.Println(result)
-
-	// // Create outfile name
-	fileName := fmt.Sprintf("%s/mongo-%s.tar", "/tmp", fileRequest.FileCarveGUID)
-	fmt.Println(fileName)
 
 	// Connect files bucket
 	b, err := gridfs.NewBucket(mongoClientConnector.Database(cfg.Storage.Mongo.Database))
@@ -92,22 +90,19 @@ func FileRequestFromMongo(w http.ResponseWriter, r *http.Request, cfg *config.Co
 		log.Fatal(err)
 	}
 	fmt.Printf("File size to download: %v\n", dStream)
-	ioutil.WriteFile(fileName, buf.Bytes(), 0644)
 
-	// Create map for JSON and set vaule
-	resp := map[string]bool{"success": true}
+	// Get content type of file
+	FileContentType := "application/octet-stream"
 
-	// Marshal map into JSON
-	// Return 404 if JOSN can't be marshalled
-	js, err := json.Marshal(resp)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	// Get the file size
+	FileSize := strconv.FormatInt(dStream, 10) //Get file size as a string
 
-	// Return sucess to client
-	w.WriteHeader(200)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
+	//Send the headers
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s.tar", fileRequest.FileCarveGUID))
+	w.Header().Set("Content-Type", FileContentType)
+	w.Header().Set("Content-Length", FileSize)
 
+	//Send the file
+	io.Copy(w, &buf) //'Copy' the file to the client
+	return
 }

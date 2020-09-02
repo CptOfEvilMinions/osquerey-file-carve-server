@@ -7,9 +7,11 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/config"
 )
 
-func writeDataToFileStream(w http.ResponseWriter, fStream *os.File, currentDataBlock string) error {
+func writeDataToFileStream(fStream *os.File, currentDataBlock string) error {
 	fmt.Println("######################################### Writing current data block to file stream #########################################")
 	// Decode Base64 block of data
 	rawDataBlock, err := base64.StdEncoding.DecodeString(currentDataBlock)
@@ -35,16 +37,16 @@ func closeFileStream(fStream *os.File, sessionID string, FileCarveSessionMap map
 	Mutex.Unlock()                         // UNlock access to FileCarveSessionMap
 }
 
-func createFileStream(carveID string) (*os.File, error) {
+func createFileStream(storageLocation string, carveID string) (*os.File, error) {
 	fmt.Println("######################################### Create file stream #########################################")
-	outFileName := fmt.Sprintf("%s/%s.tar", "/tmp", carveID)
+	outFileName := fmt.Sprintf("%s/%s.tar", storageLocation, carveID)
 	fo, err := os.Create(outFileName)
 	return fo, err
 }
 
 // FileCarveToDisk takes in file carve data blocks and processes them
 //https://www.alexedwards.net/blog/how-to-properly-parse-a-json-request-body
-func FileCarveToDisk(w http.ResponseWriter, r *http.Request) {
+func FileCarveToDisk(w http.ResponseWriter, r *http.Request, cfg *config.Config) {
 	fmt.Println("######################################### Uploading Block #########################################")
 	// Declare a new FileCarveBlock obj
 	var fileCarveBlock FileCarveBlock
@@ -61,37 +63,39 @@ func FileCarveToDisk(w http.ResponseWriter, r *http.Request) {
 
 	// If sessionID exists
 	// Update values for File Carve
-	if result == true {
-		Mutex.Lock()                                                                             // Lock access to FileCarveSessionMap
-		FileCarveSessionMap[fileCarveBlock.SessionID].Timestamp = time.Now()                     // Set timestamp to the latest time a block was received
-		FileCarveSessionMap[fileCarveBlock.SessionID].lastBlockReceived = fileCarveBlock.BlockID // Set this to the latest block ID received
+	Mutex.Lock()                                                                                                                                                    // Lock access to FileCarveSessionMap
+	FileCarveSessionMap[fileCarveBlock.SessionID].Timestamp = time.Now()                                                                                            // Set timestamp to the latest time a block was received
+	FileCarveSessionMap[fileCarveBlock.SessionID].lastBlockReceived = fileCarveBlock.BlockID                                                                        // Set this to the latest block ID received
+	FileCarveSessionMap[fileCarveBlock.SessionID].ReceivedBlockIDs = append(FileCarveSessionMap[fileCarveBlock.SessionID].ReceivedBlockIDs, fileCarveBlock.BlockID) // Add current block ID to blocks received list
 
-		// If File Stream is nil create one
-		if FileCarveSessionMap[fileCarveBlock.SessionID].FileStream == nil {
-			fStream, err := createFileStream(FileCarveSessionMap[fileCarveBlock.SessionID].CarveID)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			FileCarveSessionMap[fileCarveBlock.SessionID].FileStream = fStream
-		}
-
-		Mutex.Unlock() // UNlock access to FileCarveSessionMap
-
-		// Extract data block from JSON payload
-		// Write the current data block to the file stream
-		if err := writeDataToFileStream(w, FileCarveSessionMap[fileCarveBlock.SessionID].FileStream, fileCarveBlock.BlockData); err != nil {
+	// If File Stream is nil create one
+	if FileCarveSessionMap[fileCarveBlock.SessionID].FileStream == nil {
+		fStream, err := createFileStream(cfg.Storage.File.Location, FileCarveSessionMap[fileCarveBlock.SessionID].CarveID)
+		if err != nil {
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		FileCarveSessionMap[fileCarveBlock.SessionID].FileStream = fStream
+	}
 
+	Mutex.Unlock() // UNlock access to FileCarveSessionMap
+
+	// Extract data block from JSON payload
+	// Write the current data block to the file stream
+	if err := writeDataToFileStream(FileCarveSessionMap[fileCarveBlock.SessionID].FileStream, fileCarveBlock.BlockData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	// Check if all blocks have been received
 	// If NOT all blocks have been received return 200 for sucessful block upload
-	if len(FileCarveSessionMap[fileCarveBlock.SessionID].blockData) < FileCarveSessionMap[fileCarveBlock.SessionID].totalBlocks {
-		SucessfulUpload(w, false)
+	if len(FileCarveSessionMap[fileCarveBlock.SessionID].ReceivedBlockIDs) < FileCarveSessionMap[fileCarveBlock.SessionID].totalBlocks {
+		if err := SucessfulUpload(w, false); err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		return
 	}
 
@@ -99,5 +103,10 @@ func FileCarveToDisk(w http.ResponseWriter, r *http.Request) {
 	closeFileStream(FileCarveSessionMap[fileCarveBlock.SessionID].FileStream, fileCarveBlock.SessionID, FileCarveSessionMap)
 
 	// Instruct client sucessful upload
-	SucessfulUpload(w, true)
+	if err := SucessfulUpload(w, true); err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 }

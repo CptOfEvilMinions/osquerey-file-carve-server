@@ -29,6 +29,8 @@ type Config struct {
 			Database string `yaml:"database"`
 			Username string `yaml:"username"`
 			Password string `yaml:"password"`
+			SSL      bool   `yaml:"ssl"`
+			Options  string `yaml:"options"`
 		} `yaml:"Mongo"`
 	} `yaml:"Storage"`
 }

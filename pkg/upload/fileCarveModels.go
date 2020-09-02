@@ -11,7 +11,7 @@ import (
 // FilCarveSession struct to track state and data of file carve session
 type FilCarveSession struct {
 	Timestamp         time.Time
-	blockData         map[int]string
+	ReceivedBlockIDs  []int
 	totalBlocks       int
 	lastBlockReceived int
 	CarveID           string

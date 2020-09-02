@@ -46,10 +46,16 @@ The default setting for all the configs in this repo is to set the data block si
 * [StackOverFlow - Mongodb to Mongodb GridFS](https://stackoverflow.com/questions/30694254/mongodb-to-mongodb-gridfs)
 * [golang mongoDB GridFS query storage delete file](https://www.programmersought.com/article/92554631584/)
 * [Quick Start: Golang & MongoDB - A Quick Look at GridFS](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--a-quick-look-at-gridfs)
+* [Connection String URI Format](https://docs.mongodb.com/manual/reference/connection-string/)
+* [Github issue - how to configure TLS/SSL for mongod](https://github.com/docker-library/mongo/issues/250)
+* [StackOverFlow - How to use new URL from mongodb 3.6 to connect from golang](https://stackoverflow.com/questions/52052311/how-to-use-new-url-from-mongodb-3-6-to-connect-from-golang)
+* [StackOverflow- How to download file in browser from Go server](https://stackoverflow.com/questions/24116147/how-to-download-file-in-browser-from-go-server)
 * []()
 * []()
 * []()
 * []()
+* []()
+
 
 ### File I/O
 * [StackOverFlow - How to read/write from/to file using Go?](https://stackoverflow.com/questions/1821811/how-to-read-write-from-to-file-using-go)
@@ -64,7 +70,7 @@ The default setting for all the configs in this repo is to set the data block si
 * [Create a Basic HTTPS Server (using TLS)](https://golangcode.com/basic-https-server-with-certificate/)
 * [How can I pass the parameter to a Http handler function](https://groups.google.com/g/golang-nuts/c/SGn1gd290zI)
 * [Creating a RESTful API With Golang](https://tutorialedge.net/golang/creating-restful-api-with-golang/)
-* []()
+* [Copy a file in Go](https://shapeshed.com/copy-a-file-in-go/)
 * []()
 * []()
 * []()

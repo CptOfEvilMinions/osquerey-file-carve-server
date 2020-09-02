@@ -74,6 +74,9 @@ services:
     image: mongo:4.4.0-bionic
     container_name: 'file-carve-mongo'
     restart: unless-stopped
+    #environment: 
+    #  - MONGO_INITDB_ROOT_USERNAME=mongo
+    #  - MONGO_INITDB_ROOT_PASSWORD=mongo
     volumes:  
       - file-carve-mongo:/data/db
     ports:

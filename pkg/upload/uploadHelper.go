@@ -34,7 +34,7 @@ func CheckSessionIDexists(sessionID string, FileCarveSessionMap map[string]*FilC
 // SucessfulUpload returns status codes (200) to the client for each
 // sucessful data block upload or a status code of 200 AND {"success": true}
 // for complete file uploads
-func SucessfulUpload(w http.ResponseWriter, uploadComplete bool) {
+func SucessfulUpload(w http.ResponseWriter, uploadComplete bool) error {
 	// Let the client know ALL data block have been recevied sucessfully
 	if uploadComplete == true {
 		// Create map for JSON and set vaule
@@ -44,8 +44,7 @@ func SucessfulUpload(w http.ResponseWriter, uploadComplete bool) {
 		// Return 404 if JOSN can't be marshalled
 		js, err := json.Marshal(resp)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return err
 		}
 
 		// Return sucess to client
@@ -57,4 +56,5 @@ func SucessfulUpload(w http.ResponseWriter, uploadComplete bool) {
 	// Let the client know the data block was uploaded sucessfully
 	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "application/json")
+	return nil
 }

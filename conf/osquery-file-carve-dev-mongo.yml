@@ -1,0 +1,19 @@
+Cleanup:
+  time_invterval: 3600      # 1 Hour
+  expire_interval: 28800    # 8 Hours
+Webserver:
+  port: 8000
+Storage:
+  File:
+    enabled: false
+    location: '/tmp'
+  Mongo:
+    enabled: true
+    host: '10.150.100.210'
+    port: 27017
+    pool_size: 5
+    database: 'osquery-file-carve'
+    #username: 'mongo'
+    #password: 'mongo'
+    ssl: false
+    options: 'retryWrites=true'

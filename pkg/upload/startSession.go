@@ -45,15 +45,15 @@ func StartFileCarve(w http.ResponseWriter, r *http.Request) {
 
 	// Generate sessionID
 	sessionID := generateSessionID()
-	fmt.Println(sessionID)
-	log.Println(sessionID)
+	fmt.Println("Session ID", sessionID)
+	log.Println("Session ID", sessionID)
 
 	// Add sessionID to map
 	FileCarveSessionMap[sessionID] = &FilCarveSession{
-		Timestamp:   time.Now(),
-		totalBlocks: startFileCarve.BlockCount,
-		CarveID:     startFileCarve.CarveID,
-		blockData:   map[int]string{},
+		Timestamp:        time.Now(),
+		totalBlocks:      startFileCarve.BlockCount,
+		CarveID:          startFileCarve.CarveID,
+		ReceivedBlockIDs: []int{},
 	}
 
 	// Unlock map

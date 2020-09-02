@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/config"
+	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/database"
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/download"
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/status"
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/upload"
@@ -28,21 +29,29 @@ func setupRoutes(cfg *config.Config) {
 	if cfg.Storage.Mongo.Enabled == true {
 		log.Printf("[+] - Writing file uploads to Mongo")
 		// Init Mongo Connectors for GridFS
-		mongoBucketConnector, mongoClientConnector := upload.InitiateMongoClient(cfg)
+		mongoBucketConnector, mongoClientConnector := database.InitiateMongoClient(cfg)
 
 		// Setup handler to use Mongo for file uploads
 		http.HandleFunc("/upload_blocks", func(w http.ResponseWriter, r *http.Request) {
-			upload.UploadFileCarveToMongo(w, r, mongoBucketConnector)
+			upload.FileCarveToMongo(w, r, mongoBucketConnector)
 		})
 
 		// Setup handler to use Mongo for file downloads
-		http.HandleFunc("/download", func(w http.ResponseWriter, r *http.Request) {
+		http.HandleFunc("/file_request", func(w http.ResponseWriter, r *http.Request) {
 			download.FileRequestFromMongo(w, r, cfg, mongoClientConnector)
 		})
 
 	} else {
 		log.Printf("[+] - Writing file uploads to disk")
-		http.HandleFunc("/upload_blocks", upload.FileCarveToDisk)
+		// Setup handler to use Mongo for file uploads
+		http.HandleFunc("/upload_blocks", func(w http.ResponseWriter, r *http.Request) {
+			upload.FileCarveToDisk(w, r, cfg)
+		})
+
+		// Setup handler to use Mongo for file downloads
+		http.HandleFunc("/file_request", func(w http.ResponseWriter, r *http.Request) {
+			download.FileRequestFromDisk(w, r, cfg)
+		})
 	}
 
 	// If env debug listen on localhost and load SSL certs
