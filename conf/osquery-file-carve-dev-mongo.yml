@@ -3,6 +3,7 @@ Cleanup:
   expire_interval: 28800    # 8 Hours
 Webserver:
   port: 8000
+  SecretKey: 'super_secret_key'
 Storage:
   File:
     enabled: false
@@ -13,7 +14,11 @@ Storage:
     port: 27017
     pool_size: 5
     database: 'osquery-file-carve'
-    #username: 'mongo'
-    #password: 'mongo'
+    username: 'mongo'
+    password: 'mongo'
     ssl: false
     options: 'retryWrites=true'
+Vault:
+  hostname: 'vault.hackinglab.local'
+  port: 443
+  verifyTLS: true

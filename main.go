@@ -4,6 +4,7 @@ import (
 	"flag"
 	"os"
 
+	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/auth"
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/config"
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/database"
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/download"
@@ -22,6 +23,9 @@ func setupRoutes(cfg *config.Config) {
 
 	// Endpoint for healthchecks
 	http.HandleFunc("/status", status.HealthCheck)
+
+	// Init Vault connector
+	auth.InitVault(cfg)
 
 	// Endpoint for file upload destination
 	// By default the if no other option is set to enabled

@@ -63,7 +63,7 @@ The default setting for all the configs in this repo is to set the data block si
 * [GoDocs - Package io](https://golang.org/pkg/io/)
 * [Streaming IO in Go](https://medium.com/learning-the-go-programming-language/streaming-io-in-go-d93507931185)
 
-### net/http
+### net/http + HTTP client
 * [Format a Go string without printing?](https://stackoverflow.com/questions/11123865/format-a-go-string-without-printing)
 * [Using environment variables in Go](https://flaviocopes.com/golang-environment-variables/)
 * [Listening multiple ports on golang http servers (using http.Handler)](https://gist.github.com/filewalkwithme/24363472e7424bbe7028)
@@ -71,6 +71,12 @@ The default setting for all the configs in this repo is to set the data block si
 * [How can I pass the parameter to a Http handler function](https://groups.google.com/g/golang-nuts/c/SGn1gd290zI)
 * [Creating a RESTful API With Golang](https://tutorialedge.net/golang/creating-restful-api-with-golang/)
 * [Copy a file in Go](https://shapeshed.com/copy-a-file-in-go/)
+* [net/http - DetectContentType](https://golang.org/pkg/net/http/#DetectContentType)
+* [Golang transmit files over a net/http server to clients](https://mrwaggel.be/post/golang-transmit-files-over-a-nethttp-server-to-clients/)
+* [StackOverFlow - How to download file in browser from Go server](https://stackoverflow.com/questions/24116147/how-to-download-file-in-browser-from-go-server)
+* [Making and Using HTTP Middleware](https://www.alexedwards.net/blog/making-and-using-middleware)
+* [StackOverFlow - How to set headers in http get request?](https://stackoverflow.com/questions/12864302/how-to-set-headers-in-http-get-request)
+* [Making HTTP Requests in Golang](https://medium.com/@masnun/making-http-requests-in-golang-dd123379efe7)
 * []()
 * []()
 * []()
@@ -83,6 +89,24 @@ The default setting for all the configs in this repo is to set the data block si
 * [DockerHub - Mongo](https://hub.docker.com/_/mongo?tab=tags&page=1)
 * [DockerHub - NGINX](https://hub.docker.com/_/nginx?tab=tags)
 * []()
+* []()
+* []()
+* []()
+* []()
+
+### JWT tokens
+* [Simple JWT Authentication for Golang (Part 1)](https://dev.to/omnisyle/simple-jwt-authentication-for-golang-part-1-3kfo)
+* [Securing Golang API using Json Web Token (JWT)](https://medium.com/@Raulgzm/securing-golang-api-using-json-web-token-jwt-2dc363792a48)
+* [Using JWT for Authentication in a Golang Application](https://www.nexmo.com/blog/2020/03/13/using-jwt-for-authentication-in-a-golang-application-dr)
+* [https://www.alexedwards.net/blog/making-and-using-middleware](https://www.alexedwards.net/blog/making-and-using-middleware)
+* [Github - dgrijalva/jwt-go](https://github.com/dgrijalva/jwt-go)
+
+
+### Vault
+* [Vault - Token - Lookup a Token (Self)](https://www.vaultproject.io/api-docs/auth/token#lookup-a-token-self)
+* [Github - adfinis-sygroup/vault-client - auth_backend.go](https://github.com/adfinis-sygroup/vault-client/blob/master/src/auth_backend.go)
+* [Github - adfinis-sygroup/vault-client - auth.go](https://github.com/adfinis-sygroup/vault-client/blob/master/src/auth.go)
+* [Vault - Read Health Information](https://www.vaultproject.io/api-docs/system/health)
 * []()
 * []()
 * []()
@@ -109,6 +133,10 @@ The default setting for all the configs in this repo is to set the data block si
 * [Encode and Decode Strings using Base 64](https://golangcode.com/base-64-encode-decode/)
 * [Converting Int data type to Float in Go](https://www.golangprograms.com/convert-int-to-float-in-golang.html)
 * [time.Since() Function in Golang With Examples](https://www.geeksforgeeks.org/time-since-function-in-golang-with-examples/)
+* [Check If a File Exists Before Using It](https://golangcode.com/check-if-a-file-exists/)
+* [Golang : Convert Unix timestamp to UTC timestamp](https://socketloop.com/tutorials/golang-convert-unix-timestamp-to-utc-timestamp#:~:text=Solution%20%3A,Coordinated%20Universal%20Time)%20time%20stamp.)
+* [How to compare times in Golang?](https://www.geeksforgeeks.org/how-to-compare-times-in-golang/)
+* []()
 * []()
 * []()
 * []()

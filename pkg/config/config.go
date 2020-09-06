@@ -14,7 +14,8 @@ type Config struct {
 		ExpireInterval int `yaml:"expire_interval"`
 	} `yaml:"Cleanup"`
 	Webserver struct {
-		Port int `yaml:"port"`
+		Port      int    `yaml:"port"`
+		SecretKey string `yaml:"SecretKey"`
 	} `yaml:"Webserver"`
 	Storage struct {
 		File struct {
@@ -33,6 +34,11 @@ type Config struct {
 			Options  string `yaml:"options"`
 		} `yaml:"Mongo"`
 	} `yaml:"Storage"`
+	Vault struct {
+		Hostname  string `yaml:"hostname"`
+		Port      int    `yaml:"port"`
+		VerifyTLS bool   `yaml:"verifyTLS"`
+	} `yaml:"Vault"`
 }
 
 // NewConfig returns a new decoded Config struct

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/auth"
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/config"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -19,9 +20,9 @@ import (
 
 // retrieveFile checks if the file by GGUID exists in Mongo.
 // If it exists it returns result and nil, if not returns nil and err
-func retrieveFile(fileCarveGUIDgo string, mongoCollection *mongo.Collection) (primitive.M, error) {
+func retrieveFile(fileCarveGUID string, mongoCollection *mongo.Collection) (primitive.M, error) {
 	// Generate filter to search for document
-	mongoFilter := bson.M{"filename": fileCarveGUIDgo}
+	mongoFilter := bson.M{"filename": fileCarveGUID}
 
 	// Search for document
 	var result bson.M
@@ -49,19 +50,40 @@ func checkMongoDocExists(fileCarveGUID string, mongoCollection *mongo.Collection
 	return false
 }
 
+func extractXFordwardedFor(r *http.Request) string {
+	forwarded := r.Header.Get("X-FORWARDED-FOR")
+	if forwarded != "" {
+		return forwarded
+	}
+	return r.RemoteAddr
+}
+
 // FileRequestFromMongo this function will take in download requests
 func FileRequestFromMongo(w http.ResponseWriter, r *http.Request, cfg *config.Config, mongoClientConnector *mongo.Client) {
 	// Declare a new FileRequest obj,
 	var fileRequest FileRequest
 
-	// Try to decode the request body into the struct. If there is an error,
-	// respond to the client with the error message and a 400 status code.
 	err := json.NewDecoder(r.Body).Decode(&fileRequest)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	// Validate token
+	err = auth.TokenValdiation(fileRequest.TokenAccessor, fileRequest.Token)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Extract requestor IP address
+	ip := extractXFordwardedFor(r)
+	log.Printf("[*] - File GUID request: %s - FROM: %s - Token accessor: %s", fileRequest.FileCarveGUID, ip, fileRequest.TokenAccessor)
+	fmt.Println("hello")
+	fmt.Println(ip)
+	fmt.Println("hello")
 
 	// Create Mongo DB connector
 	db := mongoClientConnector.Database(cfg.Storage.Mongo.Database)
