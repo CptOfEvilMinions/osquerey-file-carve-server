@@ -1,4 +1,4 @@
-FROM nginx:1.19.2-alpine
+FROM nginx:1.17.8-alpine
 
 RUN mkdir /etc/nginx/tls
 COPY conf/nginx/tls/*.crt /etc/nginx/tls/kolide.crt

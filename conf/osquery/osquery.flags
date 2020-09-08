@@ -1,5 +1,6 @@
 --host_identifier=hostname
 
+
 --tls_hostname=kolide.hackinglab.local:8443
 --tls_server_certs=conf/nginx/tls/snakeoil.crt
 --enroll_secret_path=conf/osquery/osquery.key

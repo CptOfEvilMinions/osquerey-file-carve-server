@@ -43,6 +43,8 @@ func StartFileCarve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("Mongo File GUID:", startFileCarve.CarveID)
+
 	// Generate sessionID
 	sessionID := generateSessionID()
 	fmt.Println("Session ID", sessionID)

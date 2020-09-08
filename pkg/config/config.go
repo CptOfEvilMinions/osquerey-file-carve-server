@@ -14,8 +14,7 @@ type Config struct {
 		ExpireInterval int `yaml:"expire_interval"`
 	} `yaml:"Cleanup"`
 	Webserver struct {
-		Port      int    `yaml:"port"`
-		SecretKey string `yaml:"SecretKey"`
+		Port int `yaml:"port"`
 	} `yaml:"Webserver"`
 	Storage struct {
 		File struct {

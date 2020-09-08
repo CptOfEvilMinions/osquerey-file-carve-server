@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 
+	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/auth"
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/config"
 )
 
@@ -22,15 +24,26 @@ func checkFileExists(filePath string) bool {
 // FileRequestFromDisk this function allows authenticated clients to download
 // Osquery uploads by requesting the files GUID
 func FileRequestFromDisk(w http.ResponseWriter, r *http.Request, cfg *config.Config) {
-	// Decode JSON file request
+	// Declare a new FileRequest obj,
 	var fileRequest FileRequest
+
+	// Decode JSON file request
 	err := json.NewDecoder(r.Body).Decode(&fileRequest)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Check auth request
+	// Validate token
+	err = auth.TokenValdiation(fileRequest.TokenAccessor, fileRequest.Token)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Log request
+	log.Printf("[*] - File GUID request: %s - FROM: %s - Token accessor: %s", fileRequest.FileCarveGUID, extractXFordwardedFor(r), fileRequest.TokenAccessor)
 
 	// Check if file exists
 	filePath := fmt.Sprintf("%s/%s.tar", cfg.Storage.File.Location, fileRequest.FileCarveGUID)

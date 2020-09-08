@@ -50,19 +50,12 @@ func checkMongoDocExists(fileCarveGUID string, mongoCollection *mongo.Collection
 	return false
 }
 
-func extractXFordwardedFor(r *http.Request) string {
-	forwarded := r.Header.Get("X-FORWARDED-FOR")
-	if forwarded != "" {
-		return forwarded
-	}
-	return r.RemoteAddr
-}
-
 // FileRequestFromMongo this function will take in download requests
 func FileRequestFromMongo(w http.ResponseWriter, r *http.Request, cfg *config.Config, mongoClientConnector *mongo.Client) {
 	// Declare a new FileRequest obj,
 	var fileRequest FileRequest
 
+	// Decode JSON file request
 	err := json.NewDecoder(r.Body).Decode(&fileRequest)
 	if err != nil {
 		log.Println(err.Error())
@@ -78,12 +71,8 @@ func FileRequestFromMongo(w http.ResponseWriter, r *http.Request, cfg *config.Co
 		return
 	}
 
-	// Extract requestor IP address
-	ip := extractXFordwardedFor(r)
-	log.Printf("[*] - File GUID request: %s - FROM: %s - Token accessor: %s", fileRequest.FileCarveGUID, ip, fileRequest.TokenAccessor)
-	fmt.Println("hello")
-	fmt.Println(ip)
-	fmt.Println("hello")
+	// Log request
+	log.Printf("[*] - File GUID request: %s - FROM: %s - Token accessor: %s", fileRequest.FileCarveGUID, extractXFordwardedFor(r), fileRequest.TokenAccessor)
 
 	// Create Mongo DB connector
 	db := mongoClientConnector.Database(cfg.Storage.Mongo.Database)
@@ -91,6 +80,7 @@ func FileRequestFromMongo(w http.ResponseWriter, r *http.Request, cfg *config.Co
 
 	// Check file exists
 	if result := checkMongoDocExists(fileRequest.FileCarveGUID, mongoCollection); result == false {
+		err := fmt.Errorf("File does not exist: %s", fileRequest.FileCarveGUID)
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

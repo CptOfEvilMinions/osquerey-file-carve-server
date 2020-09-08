@@ -1,16 +1,26 @@
 FROM golang:alpine3.12 as build
 
-RUN mkdir -p /app/conf
+COPY go.mod /go/src/go.mod
+COPY go.sum /go/src/go.sum
+COPY main.go /go/src/main.go
+COPY pkg/ /go/src/pkg
 
-COPY go.mod /app/go.mod
-COPY go.sum /app/go.sum
-COPY main.go /app/main.go
-COPY conf/osquery-file-carve.yml /app/conf/osquery-file-carve.yml
-COPY pkg/ /app/pkg
-
-WORKDIR /app
+WORKDIR /go/src/
 
 RUN go install
 RUN go build -o main .
 
+FROM alpine:latest
+
+# Create a group and user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+RUN mkdir -p /app/conf
+COPY conf/osquery-file-carve.yml /app/conf/osquery-file-carve.yml
+COPY --from=0 /go/src/main /app/main
+
+WORKDIR /app
+
+USER appuser
+EXPOSE 8000
 CMD ["/app/main"]

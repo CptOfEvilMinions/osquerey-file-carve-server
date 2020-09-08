@@ -26,6 +26,8 @@ func FileCarveToMongo(w http.ResponseWriter, r *http.Request, mongoBucketConnect
 		return
 	}
 
+	fmt.Println("Session ID:", fileCarveBlock.SessionID)
+
 	// If sessionID exists
 	// Update values for File Carve
 	Mutex.Lock()                                                                                                                                                    // Lock access to FileCarveSessionMap

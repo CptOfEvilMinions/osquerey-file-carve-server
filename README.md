@@ -1,33 +1,44 @@
 # Osquery File Carve Server
 
+## UML diagram
+<UML diagram>
+
+
 ## Init project
 1. `cd osquery-file-carve-server/`
 1. `go mod init github.com/CptOfEvilMinions/osquery-file-carve-server`
+1. `go build`
 
 ## Assumptions
 * All blocks of data sent by Osquery will arrive in order
-* All data block sizes have appropriate settings
-
-
+* All data block sizes for NGINX, Osquery, and Mongo have appropriate settings
 
 ## Setup
 ### Block size configuration
 The default setting for all the configs in this repo is to set the data block size at 10MB (10000000 bytes). Osquery has `carver_block_size` set to 10000000 (10MB), NGINX has `client_max_body_size` set to `15MB` for TCP and TLS overhead, and Mongo GridFS blocksize is set to `10MB`.
 * Mongo GridFS blockstore has chunk size/block size set to `255K` by default.
 
-## Spin up Kolide stack
+### Generate SSL certs
+
+1. `openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout conf/kolide/tls/snakeoil.key -out conf/kolide/tls/snakeoil.crt`
+  * KOLIDE WILL ONLY WORK WITH TLS 
 1. `openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout conf/nginx/tls/snakeoil.key -out conf/nginx/tls/snakeoil.crt`
-1. ``
-1. ``
+
+### Spin up stack
+1. `docker-compose build`
+1. `docker-compose run --rm kolide fleet prepare db --config /etc/kolide/kolide.yml`
+1. `docker-compose up -d`
+1. [Setup Kolide](docs/kolide_osquery.md#Init_Kolide)
+1. [Install Osquery](docs/kolide_osquery.md#Install-Osquery-4.4.0-on-Ubuntu-20.04)
+1. [Enroll Osquery with Kolide](docs/kolide_osquery.md#Add-Osquery-host-to-Kolide)
 
 
 ## Tested Osquery versions
 * `osquery version 4.3.0` 
+* `osquery version 4.4.0` 
 
 ## To do
 * Add an API to download files
-* Add LDAP auth to API
-* Add MongoDB GridFS support for file storage
 * Add logging
 * TravisCI build
 * UML/network diagram
@@ -37,6 +48,18 @@ The default setting for all the configs in this repo is to set the data block si
 * [StackOverFlow - nginx not blocking user agents](https://serverfault.com/questions/480492/nginx-not-blocking-user-agents)
 * [StackOverFlow - Nginx: location regex for multiple paths](https://serverfault.com/questions/564127/nginx-location-regex-for-multiple-paths)
 * [Github - CptOfEvilMinions/BlogProjects](https://github.com/CptOfEvilMinions/BlogProjects/tree/master/kolide-mutual-tls)
+* [NGINX Reverse Proxy](https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/)
+* [Introducing gRPC Support with NGINX 1.13.10](https://www.nginx.com/blog/nginx-1-13-10-grpc/)
+* [Kolide Fleet – Breaking out the osquery API & Web UI](https://defensivedepth.com/2020/04/02/kolide-fleet-breaking-out-the-osquery-api-web-ui/)
+* [Slack - Osquery - NGINX config](https://osquery.slack.com/archives/C1XCLA5DZ/p1567760131054400?thread_ts=1555590511.044500&cid=C1XCLA5DZ)
+* []()
+
+### Kolide
+* [Configuring The Fleet Binary](https://github.com/kolide/fleet/blob/master/docs/infrastructure/configuring-the-fleet-binary.md)
+* [Kolide Fleet – Breaking out the osquery API & Web UI](https://defensivedepth.com/2020/04/02/kolide-fleet-breaking-out-the-osquery-api-web-ui/)
+* []()
+* []()
+* []()
 
 ### Mongo + GridFS
 * [GoDocs - package gridfs](https://godoc.org/go.mongodb.org/mongo-driver/mongo/gridfs#Bucket.OpenUploadStream)
