@@ -101,7 +101,6 @@ func FileRequestFromMongo(w http.ResponseWriter, r *http.Request, cfg *config.Co
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("File size to download: %v\n", dStream)
 
 	// Get content type of file
 	FileContentType := "application/octet-stream"

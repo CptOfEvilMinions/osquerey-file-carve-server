@@ -81,7 +81,6 @@ func vaultTokenLookup(token string) error {
 	if err != nil {
 		return fmt.Errorf("Unable to parse request body: %q", err)
 	}
-	fmt.Println(vtResuslt.Data.TokenAccessor)
 
 	// Make sure there are no auth errors
 	if vtResuslt.Error != "" || vtResuslt.Data.Token != token {

@@ -53,11 +53,11 @@ func InitiateMongoClient(cfg *config.Config) (*gridfs.Bucket, *mongo.Client) {
 
 	// Init Mongo GridFS bucket
 	mongoBucketConnector, err := gridfs.NewBucket(mongoClientConnector.Database(cfg.Storage.Mongo.Database))
-	log.Printf("[+] - Created GridFS bucket for file uploads")
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
 	}
+	log.Printf("[+] - Created GridFS bucket for file uploads")
 
 	// Return Mongo Bucket Connector
 	return mongoBucketConnector, mongoClientConnector

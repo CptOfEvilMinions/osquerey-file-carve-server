@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/auth"
+	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/cleanup"
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/config"
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/database"
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/download"
@@ -45,6 +46,9 @@ func setupRoutes(cfg *config.Config) {
 			download.FileRequestFromMongo(w, r, cfg, mongoClientConnector)
 		})
 
+		// Create GO ticker to delete old files from Mongo
+		go cleanup.DeleteOldFilesFromMongo(cfg, mongoBucketConnector)
+
 	} else {
 		log.Printf("[+] - Writing file uploads to disk")
 		// Setup handler to use Mongo for file uploads
@@ -56,11 +60,14 @@ func setupRoutes(cfg *config.Config) {
 		http.HandleFunc("/file_request", func(w http.ResponseWriter, r *http.Request) {
 			download.FileRequestFromDisk(w, r, cfg)
 		})
+
+		// Setup ticker to delete old files from disk
+		cleanup.DeleteOldFilesOnDisk(cfg)
 	}
 
 	// If env debug listen on localhost and load SSL certs
 	if os.Getenv("ENV") == "debug" {
-		fmt.Println("################################ DEBUG MODE ################################")
+		log.Println("################################ DEBUG MODE ################################")
 		address := fmt.Sprintf(":%d", cfg.Webserver.Port)
 		log.Fatal(http.ListenAndServeTLS(address, "conf/nginx/tls/snakeoil.crt", "conf/nginx/tls/snakeoil.key", nil))
 	} else {

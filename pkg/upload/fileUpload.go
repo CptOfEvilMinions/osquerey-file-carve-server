@@ -12,7 +12,6 @@ import (
 )
 
 func writeDataToFileStream(fStream *os.File, currentDataBlock string) error {
-	fmt.Println("######################################### Writing current data block to file stream #########################################")
 	// Decode Base64 block of data
 	rawDataBlock, err := base64.StdEncoding.DecodeString(currentDataBlock)
 	if err != nil {
@@ -27,7 +26,6 @@ func writeDataToFileStream(fStream *os.File, currentDataBlock string) error {
 }
 
 func closeFileStream(fStream *os.File, sessionID string, FileCarveSessionMap map[string]*FilCarveSession) {
-	fmt.Println("######################################### Close file stream #########################################")
 	// Close file stream
 	fStream.Close()
 
@@ -38,8 +36,8 @@ func closeFileStream(fStream *os.File, sessionID string, FileCarveSessionMap map
 }
 
 func createFileStream(storageLocation string, carveID string) (*os.File, error) {
-	fmt.Println("######################################### Create file stream #########################################")
 	outFileName := fmt.Sprintf("%s/%s.tar", storageLocation, carveID)
+	log.Println("Create file stream: ", outFileName)
 	fo, err := os.Create(outFileName)
 	return fo, err
 }
@@ -47,7 +45,6 @@ func createFileStream(storageLocation string, carveID string) (*os.File, error) 
 // FileCarveToDisk takes in file carve data blocks and processes them
 //https://www.alexedwards.net/blog/how-to-properly-parse-a-json-request-body
 func FileCarveToDisk(w http.ResponseWriter, r *http.Request, cfg *config.Config) {
-	fmt.Println("######################################### Uploading Block #########################################")
 	// Declare a new FileCarveBlock obj
 	var fileCarveBlock FileCarveBlock
 

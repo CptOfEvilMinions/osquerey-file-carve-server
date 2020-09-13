@@ -1,5 +1,5 @@
 Cleanup:
-  time_invterval: 3600      # 1 Hour
+  time_invterval: 60        # 1 minute
   expire_interval: 28800    # 8 Hours
 Webserver:
   port: 8000

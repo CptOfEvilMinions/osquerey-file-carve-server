@@ -3,7 +3,6 @@ package upload
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -47,8 +46,6 @@ func StartFileCarve(w http.ResponseWriter, r *http.Request) {
 
 	// Generate sessionID
 	sessionID := generateSessionID()
-	fmt.Println("Session ID", sessionID)
-	log.Println("Session ID", sessionID)
 
 	// Add sessionID to map
 	FileCarveSessionMap[sessionID] = &FilCarveSession{

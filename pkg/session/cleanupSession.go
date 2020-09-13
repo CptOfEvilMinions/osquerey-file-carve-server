@@ -1,7 +1,7 @@
 package session
 
 import (
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/config"
@@ -24,7 +24,7 @@ func CleanUpOldSessions(cfg *config.Config) {
 			// https://www.golangprograms.com/convert-int-to-float-in-golang.html
 			if time.Since(fileCarveSession.Timestamp).Seconds() >= float64(cfg.Cleanup.ExpireInterval) {
 				delete(upload.FileCarveSessionMap, sessionID)
-				fmt.Printf("[+] - %s - Cleaned up old session ID -s %s", time.Now().Format("2006-01-02 15:04:05"), sessionID)
+				log.Printf("[+] - %s - Cleaned up old session ID -s %s", time.Now().Format("2006-01-02 15:04:05"), sessionID)
 			}
 		}
 		upload.Mutex.Unlock()

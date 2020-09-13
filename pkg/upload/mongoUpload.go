@@ -2,7 +2,6 @@ package upload
 
 import (
 	"encoding/base64"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -12,7 +11,6 @@ import (
 
 // FileCarveToMongo allows file carves to be uploaded to Mongo
 func FileCarveToMongo(w http.ResponseWriter, r *http.Request, mongoBucketConnector *gridfs.Bucket) {
-	fmt.Println("######################################### Uploading Block to GridFS #########################################")
 	// Declare a new FileCarveBlock obj
 	var fileCarveBlock FileCarveBlock
 
@@ -25,8 +23,6 @@ func FileCarveToMongo(w http.ResponseWriter, r *http.Request, mongoBucketConnect
 		http.Error(w, "Session ID does not exist", http.StatusBadRequest)
 		return
 	}
-
-	fmt.Println("Session ID:", fileCarveBlock.SessionID)
 
 	// If sessionID exists
 	// Update values for File Carve
@@ -83,8 +79,6 @@ func FileCarveToMongo(w http.ResponseWriter, r *http.Request, mongoBucketConnect
 }
 
 func closeMongoUploadStream(mStream *gridfs.UploadStream, sessionID string, FileCarveSessionMap map[string]*FilCarveSession) error {
-	fmt.Println("######################################### Close Mongo stream #########################################")
-
 	// Delete session from FileCarveSessionMap
 	Mutex.Lock()                           // Lock access to FileCarveSessionMap
 	delete(FileCarveSessionMap, sessionID) // Delete session from FileCarveSessionMap
@@ -98,6 +92,7 @@ func closeMongoUploadStream(mStream *gridfs.UploadStream, sessionID string, File
 }
 
 func createMongoUploadStream(mongoBucketConnector *gridfs.Bucket, CarveID string) (*gridfs.UploadStream, error) {
+	log.Println("Create Mongo GridFS file object: ", CarveID)
 	// Create uploadStream
 	println("File CarveID: ", CarveID)
 	uploadStream, err := mongoBucketConnector.OpenUploadStream(CarveID)
@@ -105,7 +100,6 @@ func createMongoUploadStream(mongoBucketConnector *gridfs.Bucket, CarveID string
 }
 
 func writeDataToMongoStream(mStream *gridfs.UploadStream, currentDataBlock string) error {
-	fmt.Println("######################################### Writing current data block to GridFS #########################################")
 	// Decode Base64 block of data
 	rawDataBlock, err := base64.StdEncoding.DecodeString(currentDataBlock)
 	if err != nil {
