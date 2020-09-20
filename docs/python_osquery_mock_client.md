@@ -35,4 +35,7 @@ The test cases below are meant to stres test the osquery-file-carve server.
 * [Getting file size in Python? [duplicate]](https://stackoverflow.com/questions/6591931/getting-file-size-in-python)
 * [Chunking in Python---How to set the "chunk size" of read lines from file read with Python open()?](https://www.reddit.com/r/learnpython/comments/52vpjz/chunking_in_pythonhow_to_set_the_chunk_size_of/)
 * [Sending “User-agent” using Requests library in Python](https://stackoverflow.com/questions/10606133/sending-user-agent-using-requests-library-in-python)
+* [StackOverFlow - python tarfile to ignore directory structure while creating tarball](https://stackoverflow.com/questions/18487171/python-tarfile-to-ignore-directory-structure-while-creating-tarball/18488540)
+* []()
+* []()
 * []()

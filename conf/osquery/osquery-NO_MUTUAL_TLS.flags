@@ -1,10 +1,7 @@
 --host_identifier=hostname
 
 --tls_hostname=kolide.hackinglab.local:8443
---tls_server_certs=conf/tls/osquery/snakeoil_osquery_server_cert_chain.crt
---tls_client_cert=conf/tls/device/snakeoil_device01.crt
---tls_client_key=conf/tls/device/snakeoil_device01.key
-
+--tls_server_certs=conf/tls/kolide/snakeoil_kolide_hackinglab_local.crt
 --enroll_secret_path=conf/osquery/osquery.key
 --enroll_tls_endpoint=/api/v1/osquery/enroll
 

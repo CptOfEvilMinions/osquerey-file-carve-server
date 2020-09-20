@@ -16,14 +16,10 @@
 
 ## Setup
 ### Block size configuration
-The default setting for all the configs in this repo is to set the data block size at 10MB (10000000 bytes). Osquery has `carver_block_size` set to 10000000 (10MB), NGINX has `client_max_body_size` set to `15MB` for TCP and TLS overhead, and Mongo GridFS blocksize is set to `10MB`.
-* Mongo GridFS blockstore has chunk size/block size set to `255K` by default.
+The default setting for all the configs in this repo is to set the data block size at 10MB (10000000 bytes). Osquery has `carver_block_size` set to 10000000 (10MB).
 
 ### Generate SSL certs
 
-1. `openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout conf/kolide/tls/snakeoil.key -out conf/kolide/tls/snakeoil.crt`
-  * KOLIDE WILL ONLY WORK WITH TLS 
-1. `openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout conf/nginx/tls/snakeoil.key -out conf/nginx/tls/snakeoil.crt`
 
 ### Spin up stack
 1. `docker-compose build`

@@ -8,8 +8,8 @@ RUN mkdir -p /etc/kolide/tls
 
 # Copy Kolide config
 COPY conf/kolide/kolide.yml /etc/kolide/kolide.yml
-COPY conf/kolide/tls/*.crt /etc/kolide/tls/kolide.crt
-COPY conf/kolide/tls/*.key /etc/kolide/tls/kolide.key
+COPY conf/tls/kolide/*.crt /etc/kolide/tls/kolide.crt
+COPY conf/tls/kolide/*.key /etc/kolide/tls/kolide.key
 
 USER appuser
 EXPOSE 8080
