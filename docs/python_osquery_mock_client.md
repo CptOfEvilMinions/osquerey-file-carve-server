@@ -13,15 +13,16 @@ The test cases below are meant to stres test the osquery-file-carve server.
 
 ### 10MB,zip single file upload
 1. `osquery-file-carve-server/tests`
-1. `python3 tests/osquery_mock_client.py --file /tmp/10MB.zip --threads=1 --base_url=https://<Kolide IP addr>:<port>`
+1. `python3 tests/osquery_mock_client.py --file /tmp/10MB.zip --threads=1 --base_url=https://<Kolide IP addr>:<port> --verbose`
+  1. ![python_osquery_mock_client](../.img/python_osquery_mock_client.png)
 
 ### 10MB.zip multiple file upload
 1. `osquery-file-carve-server/tests`
-1. `python3 tests/osquery_mock_client.py --file /tmp/10MB.zip --threads=10 --base_url=https://<Kolide IP addr>:<port>`
+1. `python3 tests/osquery_mock_client.py --file /tmp/10MB.zip --threads=10 --base_url=https://<Kolide IP addr>:<port> --verbose`
 
 ### 100MB.zip multiple file upload
 1. `osquery-file-carve-server/tests`
-1. `python3 tests/osquery_mock_client.py --file /tmp/10MB.zip --threads=10 --base_url=https://<Kolide IP addr>:<port>`
+1. `python3 tests/osquery_mock_client.py --file /tmp/10MB.zip --threads=10 --base_url=https://<Kolide IP addr>:<port> --verbose`
 
 
 ## References
@@ -33,5 +34,5 @@ The test cases below are meant to stres test the osquery-file-carve server.
 * [The Python Modulo Operator - What Does the % Symbol Mean in Python? (Solved)](https://www.freecodecamp.org/news/the-python-modulo-operator-what-does-the-symbol-mean-in-python-solved/)
 * [Getting file size in Python? [duplicate]](https://stackoverflow.com/questions/6591931/getting-file-size-in-python)
 * [Chunking in Python---How to set the "chunk size" of read lines from file read with Python open()?](https://www.reddit.com/r/learnpython/comments/52vpjz/chunking_in_pythonhow_to_set_the_chunk_size_of/)
-* []()
+* [Sending “User-agent” using Requests library in Python](https://stackoverflow.com/questions/10606133/sending-user-agent-using-requests-library-in-python)
 * []()

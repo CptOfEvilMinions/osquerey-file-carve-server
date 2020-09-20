@@ -17,11 +17,11 @@ FROM alpine:latest
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 RUN mkdir -p /app/conf
-COPY conf/osquery-file-carve.yml /app/conf/osquery-file-carve.yml
+COPY conf/osquery-file-carve/osquery-file-carve.yml /app/conf/osquery-file-carve.yml
 COPY --from=0 /go/src/main /app/main
 
 WORKDIR /app
 
 USER appuser
 EXPOSE 8000
-CMD ["/app/main"]
+CMD ["/app/main","--config", "conf/osquery-file-carve.yml"]

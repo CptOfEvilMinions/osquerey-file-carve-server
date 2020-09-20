@@ -21,3 +21,4 @@ Vault:
   hostname: 'vault.hackinglab.local'
   port: 443
   verifyTLS: true
+  policy: 'osquery-file-carve-file-requests'

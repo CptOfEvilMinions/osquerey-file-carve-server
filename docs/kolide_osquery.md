@@ -25,9 +25,9 @@
 1. `sudo add-apt-repository 'deb [arch=amd64] https://pkg.osquery.io/deb deb main'`
 1. `sudo apt-get update`
 1. `sudo apt-get install osquery -y`
-1. wget <Osquery config> -O /etc/osquery/osquery.flags
-1. sed -i 's/sdfsd/dsffsdf/g' /etc/osquery/osquery.flags
-1. wget <Download server cert> /etc/osquery/snakeoil.crt
+1. `wget https://raw.githubusercontent.com/CptOfEvilMinions/osquerey-file-carve-server/master/conf/osquery/osquery.flags -O /etc/osquery/osquery.flags`
+1. `sed -i 's/kolide.hackinglab.local:8443/<FQDN or IP addr of Kolide:<port> /g' /etc/osquery/osquery.flags`
+1. `scp <server cert> <user>@<ubuntu IP addr>:/etc/osquery/snakeoil.crt`
 
 ## Add Osquery host to Kolide
 1. Login into Kolide

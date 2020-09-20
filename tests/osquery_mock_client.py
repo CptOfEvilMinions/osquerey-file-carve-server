@@ -13,7 +13,7 @@ import tarfile
 urllib3.disable_warnings()
 
 class FileUpload:
-  def __init__(self, file_path, block_size, base_url):
+  def __init__(self, file_path, block_size, base_url, verbose):
     self.file_path = file_path                        # Specify the file path for the file to upload
     self.block_size = block_size
     self.base_url = base_url
@@ -22,6 +22,7 @@ class FileUpload:
     self.block_count = self.generate_block_count()    # Generate of blocks for TAR file upload
     self.session_id = self.get_session_id()           # Request Session ID
     self.upload_status = True
+    self.verbose = verbose                            
 
   def generate_block_count(self):
     """
@@ -40,8 +41,9 @@ class FileUpload:
     Takes in a file path and TARs up the file in the tmp directory
     """
     tar_file_path = f"/tmp/{self.file_guid}.tar"
-    with tarfile.open(tar_file_path, "w") as tar_handle:
-      tar_handle.add(os.path.join(self.file_path))
+    with tarfile.open(tar_file_path, "w:") as tar_handle:
+      tar_handle.add(self.file_path, arcname=os.path.basename(self.file_path))
+    print (f"Sucessfully created temp TAR file - {tar_file_path}")
     return tar_file_path
 
 
@@ -58,8 +60,13 @@ class FileUpload:
       "node_key": "5"
     }
 
+    # Set headers to Osqurey
+    headers = {
+      "User-Agent": "osquery-python-mock-client",
+    }
+
     url = f"{self.base_url}/start_uploads"
-    r = requests.get(url=url, data=json.dumps(data), timeout=10, verify=False)
+    r = requests.get(url=url, data=json.dumps(data), headers=headers, timeout=10, verify=False)
     
     print (f"""Session ID: {r.json()["session_id"]}""")
     return r.json()["session_id"]
@@ -79,15 +86,25 @@ def post_block(fileUpload, block_data, block_id):
     "data": block_data
   }
 
+  # Set headers to Osqurey
+  headers = {
+    "User-Agent": "osquery-python-mock-client",
+  }
+
 
   url = f"{fileUpload.base_url}/upload_blocks"
-  r = requests.post(url=url, data=json.dumps(data), verify=False)
+  r = requests.post(url=url, data=json.dumps(data), headers=headers, timeout=10, verify=False)
+
 
   if r.status_code != 200:
-    print ( f"{Fore.RED}{block_id}{r.status_code}{r.text}{Style.RESET_ALL}")
     fileUpload.upload_status = False
-  else:
-    print ( f"{Fore.GREEN}{block_id} - {r.status_code} - {r.text}{Style.RESET_ALL}")
+
+  if fileUpload.verbose == True:
+    if r.status_code != 200:
+      print ( f"{Fore.RED}{block_id}{r.status_code}{r.text}{Style.RESET_ALL}")
+    else:
+      print ( f"{Fore.GREEN}{block_id} - {r.status_code} - {r.text}{Style.RESET_ALL}")
+    
 
   
 
@@ -110,21 +127,24 @@ def chunk_file(fileUpload):
 
   # Delete tar before we exit thread
   os.remove(fileUpload.tar_file_path)
+  if fileUpload.verbose == True:
+    print (f"Sucessfully deleted temp TAR file - {fileUpload.tar_file_path}")
   return
 
 if __name__ == "__main__":
   my_parser = argparse.ArgumentParser()
   my_parser.add_argument('--file', type=str, required=True, help='Test file to send', )
-  my_parser.add_argument('--block_size', type=int, default=1000000, required=True, help='Size of each block')
-  my_parser.add_argument('--base_url', type=int, required=True, help='Size of each block')
+  my_parser.add_argument('--block_size', type=int, default=1000000, help='Size of each block')
+  my_parser.add_argument('--base_url', type=str, required=True, help='Size of each block')
   my_parser.add_argument('--threads', type=int, default=1, help='Size of each block')
+  my_parser.add_argument('--verbose', action='store_true', help='Enable verbose output')
   args = my_parser.parse_args()
 
   fileUploads = list()
   # Start threads
   threads = [] 
   for i in range(args.threads):
-    fileUpload = FileUpload(args.file, args.block_size, args.base_url)
+    fileUpload = FileUpload(args.file, args.block_size, args.base_url, args.verbose)
     fileUploads.append(fileUpload)
     t = threading.Thread(target=chunk_file, args=(fileUpload,))
     threads.append(t)

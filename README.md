@@ -1,8 +1,9 @@
 # Osquery File Carve Server
 
-## UML diagram
-<UML diagram>
-
+## Network diagram
+<p align="center">
+  <img src=".img/network_diagram.png">
+</p>
 
 ## Build project
 1. `cd osquery-file-carve-server/`
@@ -57,7 +58,7 @@ The default setting for all the configs in this repo is to set the data block si
 * [Introducing gRPC Support with NGINX 1.13.10](https://www.nginx.com/blog/nginx-1-13-10-grpc/)
 * [Kolide Fleet – Breaking out the osquery API & Web UI](https://defensivedepth.com/2020/04/02/kolide-fleet-breaking-out-the-osquery-api-web-ui/)
 * [Slack - Osquery - NGINX config](https://osquery.slack.com/archives/C1XCLA5DZ/p1567760131054400?thread_ts=1555590511.044500&cid=C1XCLA5DZ)
-* []()
+* [Nginx Redirect via Proxy, Rewrite and Preserve URL](https://serverfault.com/questions/586586/nginx-redirect-via-proxy-rewrite-and-preserve-url)
 
 ### Kolide
 * [Configuring The Fleet Binary](https://github.com/kolide/fleet/blob/master/docs/infrastructure/configuring-the-fleet-binary.md)
