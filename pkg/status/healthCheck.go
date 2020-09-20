@@ -2,6 +2,8 @@ package status
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -15,7 +17,8 @@ func HealthCheck(w http.ResponseWriter, r *http.Request) {
 	// Return 404 if JOSN can't be marshalled
 	js, err := json.Marshal(resp)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 		return
 	}
 

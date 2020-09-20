@@ -3,6 +3,8 @@ package upload
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"time"
 
@@ -38,11 +40,17 @@ func StartFileCarve(w http.ResponseWriter, r *http.Request) {
 	// respond to the client with the error message and a 400 status code.
 	err := json.NewDecoder(r.Body).Decode(&startFileCarve)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println("startSession - StartFileCarve - 1 -", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 		return
 	}
 
-	fmt.Println("Mongo File GUID:", startFileCarve.CarveID)
+	if r.Header.Get("X-FORWARDED-FOR") != "" {
+		log.Printf("Host %s starting a file upload for Mongo File GUID: %s\n", r.Header.Get("X-FORWARDED-FOR"), startFileCarve.CarveID)
+	} else {
+		log.Printf("Host %s starting a file upload for Mongo File GUID: %s\n", r.RemoteAddr, startFileCarve.CarveID)
+	}
 
 	// Generate sessionID
 	sessionID := generateSessionID()
@@ -55,6 +63,8 @@ func StartFileCarve(w http.ResponseWriter, r *http.Request) {
 		ReceivedBlockIDs: []int{},
 	}
 
+	fmt.Println(FileCarveSessionMap)
+
 	// Unlock map
 	Mutex.Unlock()
 
@@ -65,11 +75,14 @@ func StartFileCarve(w http.ResponseWriter, r *http.Request) {
 	// Return 404 if JOSN can't be marshalled
 	js, err := json.Marshal(resp)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println("startSession - StartFileCarve - 2 -", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 		return
 	}
 
 	// Return session ID
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
+
 }

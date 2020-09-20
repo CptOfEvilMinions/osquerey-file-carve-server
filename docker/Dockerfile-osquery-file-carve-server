@@ -2,12 +2,13 @@ FROM golang:alpine3.12 as build
 
 COPY go.mod /go/src/go.mod
 COPY go.sum /go/src/go.sum
+RUN cd /go/src && go get ./...
+
 COPY main.go /go/src/main.go
 COPY pkg/ /go/src/pkg
 
 WORKDIR /go/src/
 
-RUN go install
 RUN go build -o main .
 
 FROM alpine:latest

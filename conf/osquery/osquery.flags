@@ -18,10 +18,10 @@
 --distributed_tls_read_endpoint=/api/v1/osquery/distributed/read
 --distributed_tls_write_endpoint=/api/v1/osquery/distributed/write
 
---read_max=100000000
+--read_max=1000000000
 --disable_carver=false
 --carver_compression=false
---carver_block_size=100000000
+--carver_block_size=1000000
 --carver_start_endpoint=/start_uploads 
 --carver_continue_endpoint=/upload_blocks 
 --carver_disable_function=false

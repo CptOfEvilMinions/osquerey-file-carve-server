@@ -4,7 +4,7 @@
 <UML diagram>
 
 
-## Init project
+## Build project
 1. `cd osquery-file-carve-server/`
 1. `go mod init github.com/CptOfEvilMinions/osquery-file-carve-server`
 1. `go build`
@@ -33,13 +33,18 @@ The default setting for all the configs in this repo is to set the data block si
 1. [Enroll Osquery with Kolide](docs/kolide_osquery.md#Add-Osquery-host-to-Kolide)
 
 
+## Resource stats
+* If the Osquery `carver_block_size` is set to `1000000` (1MB) the osquery-file-carve server will consume roughly 30MB
+* If the Osquery `carver_block_size` is set to `10000000` (10MB) the osquery-file-carve server will consume roughly 140MB
+
+
 ## Tested Osquery versions
 * `osquery version 4.3.0` 
 * `osquery version 4.4.0` 
 
 ## To do
-* Add an API to download files
-* Add logging
+* Add the ability to clean up unsucessful uploads from Mongo
+  * Files will be deleted at specified clean up interval
 * TravisCI build
 * UML/network diagram
 
@@ -73,9 +78,8 @@ The default setting for all the configs in this repo is to set the data block si
 * [Github issue - how to configure TLS/SSL for mongod](https://github.com/docker-library/mongo/issues/250)
 * [StackOverFlow - How to use new URL from mongodb 3.6 to connect from golang](https://stackoverflow.com/questions/52052311/how-to-use-new-url-from-mongodb-3-6-to-connect-from-golang)
 * [StackOverflow- How to download file in browser from Go server](https://stackoverflow.com/questions/24116147/how-to-download-file-in-browser-from-go-server)
-* []()
-* []()
-* []()
+* [primitive.go](https://sourcegraph.com/github.com/mongodb/mongo-go-driver/-/blob/bson/primitive/primitive.go#L74:24)
+* [StackOverFlow - Delete all the document older than a date using _id in mongo using mgo](https://stackoverflow.com/questions/34412502/delete-all-the-document-older-than-a-date-using-id-in-mongo-using-mgo)
 * []()
 * []()
 
@@ -159,6 +163,7 @@ The default setting for all the configs in this repo is to set the data block si
 * [Check If a File Exists Before Using It](https://golangcode.com/check-if-a-file-exists/)
 * [Golang : Convert Unix timestamp to UTC timestamp](https://socketloop.com/tutorials/golang-convert-unix-timestamp-to-utc-timestamp#:~:text=Solution%20%3A,Coordinated%20Universal%20Time)%20time%20stamp.)
 * [How to compare times in Golang?](https://www.geeksforgeeks.org/how-to-compare-times-in-golang/)
+* [Subtracting time.Duration from time in Go](https://stackoverflow.com/questions/26285735/subtracting-time-duration-from-time-in-go)
 * []()
 * []()
 * []()

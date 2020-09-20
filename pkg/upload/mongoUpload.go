@@ -2,15 +2,18 @@ package upload
 
 import (
 	"encoding/base64"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo/gridfs"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // FileCarveToMongo allows file carves to be uploaded to Mongo
-func FileCarveToMongo(w http.ResponseWriter, r *http.Request, mongoBucketConnector *gridfs.Bucket) {
+func FileCarveToMongo(w http.ResponseWriter, r *http.Request, mongoBucketConnector *gridfs.Bucket, mongoClientConnector *mongo.Client, mongoCollectionConnector *mongo.Collection) {
 	// Declare a new FileCarveBlock obj
 	var fileCarveBlock FileCarveBlock
 
@@ -20,7 +23,8 @@ func FileCarveToMongo(w http.ResponseWriter, r *http.Request, mongoBucketConnect
 	// Check if Sesssion ID exists.
 	result := CheckSessionIDexists(fileCarveBlock.SessionID, FileCarveSessionMap)
 	if result == false {
-		http.Error(w, "Session ID does not exist", http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, "Session ID does not exist"))
 		return
 	}
 
@@ -33,10 +37,12 @@ func FileCarveToMongo(w http.ResponseWriter, r *http.Request, mongoBucketConnect
 
 	// If Mongo Upload Stream is nil create one
 	if FileCarveSessionMap[fileCarveBlock.SessionID].MongoUploadStream == nil {
+		// Create Mongo Upload Stream
 		mStream, err := createMongoUploadStream(mongoBucketConnector, FileCarveSessionMap[fileCarveBlock.SessionID].CarveID)
 		if err != nil {
 			log.Println(err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			w.WriteHeader(http.StatusInternalServerError)
+			io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 			return
 		}
 		FileCarveSessionMap[fileCarveBlock.SessionID].MongoUploadStream = mStream
@@ -47,7 +53,8 @@ func FileCarveToMongo(w http.ResponseWriter, r *http.Request, mongoBucketConnect
 	// Write the current data block to the file stream
 	if err := writeDataToMongoStream(FileCarveSessionMap[fileCarveBlock.SessionID].MongoUploadStream, fileCarveBlock.BlockData); err != nil {
 		log.Panicln(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 		return
 	}
 
@@ -56,7 +63,8 @@ func FileCarveToMongo(w http.ResponseWriter, r *http.Request, mongoBucketConnect
 	if len(FileCarveSessionMap[fileCarveBlock.SessionID].ReceivedBlockIDs) < FileCarveSessionMap[fileCarveBlock.SessionID].totalBlocks {
 		if err := SucessfulUpload(w, false); err != nil {
 			log.Println(err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			w.WriteHeader(http.StatusInternalServerError)
+			io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 			return
 		}
 		return
@@ -64,28 +72,36 @@ func FileCarveToMongo(w http.ResponseWriter, r *http.Request, mongoBucketConnect
 
 	// Close File Stream
 	if err := closeMongoUploadStream(FileCarveSessionMap[fileCarveBlock.SessionID].MongoUploadStream, fileCarveBlock.SessionID, FileCarveSessionMap); err != nil {
-		log.Panicln(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Panicln("Close Mongo file stream error: ", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 		return
 	}
 
 	// Instruct client sucessful upload
 	if err := SucessfulUpload(w, true); err != nil {
 		log.Println(err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 		return
 	}
 
 }
 
+
+
 func closeMongoUploadStream(mStream *gridfs.UploadStream, sessionID string, FileCarveSessionMap map[string]*FilCarveSession) error {
 	// Delete session from FileCarveSessionMap
+	fmt.Println(FileCarveSessionMap)
 	Mutex.Lock()                           // Lock access to FileCarveSessionMap
 	delete(FileCarveSessionMap, sessionID) // Delete session from FileCarveSessionMap
 	Mutex.Unlock()                         // UNlock access to FileCarveSessionMap
 
+	fmt.Println(FileCarveSessionMap)
+
 	// Close Mongo stream
 	if err := mStream.Close(); err != nil {
+		log.Println(err)
 		return err
 	}
 	return nil
@@ -94,7 +110,7 @@ func closeMongoUploadStream(mStream *gridfs.UploadStream, sessionID string, File
 func createMongoUploadStream(mongoBucketConnector *gridfs.Bucket, CarveID string) (*gridfs.UploadStream, error) {
 	log.Println("Create Mongo GridFS file object: ", CarveID)
 	// Create uploadStream
-	println("File CarveID: ", CarveID)
+	println("File CarveID: ", CarveID)	
 	uploadStream, err := mongoBucketConnector.OpenUploadStream(CarveID)
 	return uploadStream, err
 }

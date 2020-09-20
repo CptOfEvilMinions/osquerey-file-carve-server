@@ -51,38 +51,39 @@ func checkMongoDocExists(fileCarveGUID string, mongoCollection *mongo.Collection
 }
 
 // FileRequestFromMongo this function will take in download requests
-func FileRequestFromMongo(w http.ResponseWriter, r *http.Request, cfg *config.Config, mongoClientConnector *mongo.Client) {
+func FileRequestFromMongo(w http.ResponseWriter, r *http.Request, cfg *config.Config, mongoClientConnector *mongo.Client, mongoCollectionConnector *mongo.Collection) {
 	// Declare a new FileRequest obj,
 	var fileRequest FileRequest
 
 	// Decode JSON file request
 	err := json.NewDecoder(r.Body).Decode(&fileRequest)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 		return
 	}
 
 	// Validate token
-	err = auth.TokenValdiation(fileRequest.TokenAccessor, fileRequest.Token)
+	err = auth.TokenValdiation(fileRequest.TokenAccessor, fileRequest.Token, cfg.Vault.Policy)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 		return
 	}
 
 	// Log request
-	log.Printf("[*] - File GUID request: %s - FROM: %s - Token accessor: %s", fileRequest.FileCarveGUID, extractXFordwardedFor(r), fileRequest.TokenAccessor)
-
-	// Create Mongo DB connector
-	db := mongoClientConnector.Database(cfg.Storage.Mongo.Database)
-	mongoCollection := db.Collection("fs.files")
+	if r.Header.Get("X-FORWARDED-FOR") != "" {
+		log.Printf("File GUID request: %s - FROM: %s - Token accessor: %s\n", fileRequest.FileCarveGUID, extractXFordwardedFor(r), fileRequest.TokenAccessor)
+	} else {
+		log.Printf("File GUID request: %s - FROM: %s - Token accessor: %s\n", fileRequest.FileCarveGUID, r.RemoteAddr, fileRequest.TokenAccessor)
+	}
 
 	// Check file exists
-	if result := checkMongoDocExists(fileRequest.FileCarveGUID, mongoCollection); result == false {
+	if result := checkMongoDocExists(fileRequest.FileCarveGUID, mongoCollectionConnector); result == false {
 		err := fmt.Errorf("File does not exist: %s", fileRequest.FileCarveGUID)
 		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 		return
 	}
 

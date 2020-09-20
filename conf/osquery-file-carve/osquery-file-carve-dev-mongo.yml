@@ -1,13 +1,10 @@
 Cleanup:
-  time_invterval: 60        # 1 minute
-  expire_interval: 28800    # 8 Hours
+  time_invterval: 60      # 1 minute
+  expire_interval: 28800  # 8 Hours
 Webserver:
   port: 8000
   SecretKey: 'super_secret_key'
 Storage:
-  File:
-    enabled: false
-    location: '/tmp'
   Mongo:
     enabled: true
     host: '10.150.100.210'
@@ -22,3 +19,4 @@ Vault:
   hostname: 'vault.hackinglab.local'
   port: 443
   verifyTLS: true
+  policy: 'osquery-file-carve-file-requests'

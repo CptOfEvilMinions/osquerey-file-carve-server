@@ -6,10 +6,10 @@
 
 --disable_distributed=true
 
---read_max=100000000
+--read_max=1000000000
 --disable_carver=false
 --carver_compression=false
---carver_block_size=10000000
+--carver_block_size=1000000
 --carver_start_endpoint=/start_uploads
 --carver_continue_endpoint=/upload_blocks
 --carver_disable_function=false

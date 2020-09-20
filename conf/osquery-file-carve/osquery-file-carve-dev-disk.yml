@@ -1,0 +1,13 @@
+Cleanup:
+  time_invterval: 60      # 1 Hour
+  expire_interval: 28800    # 8 Hours
+Webserver:
+  port: 8000
+Storage:
+  File:
+    enabled: true
+    location: '/tmp'
+Vault:
+  hostname: 'vault.hackinglab.local'
+  port: 443
+  verifyTLS: true

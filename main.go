@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/auth"
-	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/cleanup"
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/config"
+	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/cleanup"
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/database"
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/download"
 	"github.com/CptOfEvilMinions/osquery-file-carve-server/pkg/status"
@@ -33,17 +33,18 @@ func setupRoutes(cfg *config.Config) {
 	// the option to write files to disk will be used.
 	if cfg.Storage.Mongo.Enabled == true {
 		log.Printf("[+] - Writing file uploads to Mongo")
+
 		// Init Mongo Connectors for GridFS
-		mongoBucketConnector, mongoClientConnector := database.InitiateMongoClient(cfg)
+		mongoBucketConnector, mongoClientConnector, mongoCollectionConnector := database.InitiateMongoClient(cfg)
 
 		// Setup handler to use Mongo for file uploads
 		http.HandleFunc("/upload_blocks", func(w http.ResponseWriter, r *http.Request) {
-			upload.FileCarveToMongo(w, r, mongoBucketConnector)
+			upload.FileCarveToMongo(w, r, mongoBucketConnector, mongoClientConnector, mongoCollectionConnector)
 		})
 
 		// Setup handler to use Mongo for file downloads
 		http.HandleFunc("/file_request", func(w http.ResponseWriter, r *http.Request) {
-			download.FileRequestFromMongo(w, r, cfg, mongoClientConnector)
+			download.FileRequestFromMongo(w, r, cfg, mongoClientConnector, mongoCollectionConnector)
 		})
 
 		// Create GO ticker to delete old files from Mongo
@@ -62,7 +63,7 @@ func setupRoutes(cfg *config.Config) {
 		})
 
 		// Setup ticker to delete old files from disk
-		cleanup.DeleteOldFilesOnDisk(cfg)
+		go cleanup.DeleteOldFilesOnDisk(cfg)
 	}
 
 	// If env debug listen on localhost and load SSL certs

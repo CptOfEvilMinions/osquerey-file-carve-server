@@ -2,6 +2,7 @@ package upload
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -12,7 +13,9 @@ import (
 func JSONDecode(w http.ResponseWriter, rBody io.ReadCloser, fileCarveBlock *FileCarveBlock) {
 	err := json.NewDecoder(rBody).Decode(fileCarveBlock)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println("uploadHelper - JSONDecode -", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 		return
 	}
 }

@@ -37,6 +37,7 @@ type Config struct {
 		Hostname  string `yaml:"hostname"`
 		Port      int    `yaml:"port"`
 		VerifyTLS bool   `yaml:"verifyTLS"`
+		Policy    string `yaml:"policy"`
 	} `yaml:"Vault"`
 }
 

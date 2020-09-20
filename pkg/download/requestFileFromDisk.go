@@ -30,15 +30,17 @@ func FileRequestFromDisk(w http.ResponseWriter, r *http.Request, cfg *config.Con
 	// Decode JSON file request
 	err := json.NewDecoder(r.Body).Decode(&fileRequest)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 		return
 	}
 
 	// Validate token
-	err = auth.TokenValdiation(fileRequest.TokenAccessor, fileRequest.Token)
+	err = auth.TokenValdiation(fileRequest.TokenAccessor, fileRequest.Token, cfg.Vault.Policy)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 		return
 	}
 
@@ -48,14 +50,16 @@ func FileRequestFromDisk(w http.ResponseWriter, r *http.Request, cfg *config.Con
 	// Check if file exists
 	filePath := fmt.Sprintf("%s/%s.tar", cfg.Storage.File.Location, fileRequest.FileCarveGUID)
 	if result := checkFileExists(filePath); result == false {
-		http.Error(w, "File with that GUID does not exist", http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, "File with that GUID does not exist"))
 		return
 	}
 
 	// Open file
 	fromFile, err := os.Open(filePath)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 		return
 	}
 	defer fromFile.Close()

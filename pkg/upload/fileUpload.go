@@ -3,6 +3,7 @@ package upload
 import (
 	"encoding/base64"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -26,13 +27,16 @@ func writeDataToFileStream(fStream *os.File, currentDataBlock string) error {
 }
 
 func closeFileStream(fStream *os.File, sessionID string, FileCarveSessionMap map[string]*FilCarveSession) {
+	fmt.Println(FileCarveSessionMap)
 	// Close file stream
 	fStream.Close()
+	fmt.Println("Closing", sessionID, "stream")
 
 	// Delete session from FileCarveSessionMap
 	Mutex.Lock()                           // Lock access to FileCarveSessionMap
 	delete(FileCarveSessionMap, sessionID) // Delete session from FileCarveSessionMap
 	Mutex.Unlock()                         // UNlock access to FileCarveSessionMap
+	fmt.Println(FileCarveSessionMap)
 }
 
 func createFileStream(storageLocation string, carveID string) (*os.File, error) {
@@ -54,9 +58,12 @@ func FileCarveToDisk(w http.ResponseWriter, r *http.Request, cfg *config.Config)
 	// Check if Sesssion ID exists.
 	result := CheckSessionIDexists(fileCarveBlock.SessionID, FileCarveSessionMap)
 	if result == false {
-		http.Error(w, "Session ID does not exist", http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, "Session ID does not exist"))
 		return
 	}
+
+	fmt.Printf("SessionID: %s - Block ID: %d\n", fileCarveBlock.SessionID, fileCarveBlock.BlockID)
 
 	// If sessionID exists
 	// Update values for File Carve
@@ -70,7 +77,8 @@ func FileCarveToDisk(w http.ResponseWriter, r *http.Request, cfg *config.Config)
 		fStream, err := createFileStream(cfg.Storage.File.Location, FileCarveSessionMap[fileCarveBlock.SessionID].CarveID)
 		if err != nil {
 			log.Println(err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			w.WriteHeader(http.StatusInternalServerError)
+			io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 			return
 		}
 		FileCarveSessionMap[fileCarveBlock.SessionID].FileStream = fStream
@@ -81,7 +89,9 @@ func FileCarveToDisk(w http.ResponseWriter, r *http.Request, cfg *config.Config)
 	// Extract data block from JSON payload
 	// Write the current data block to the file stream
 	if err := writeDataToFileStream(FileCarveSessionMap[fileCarveBlock.SessionID].FileStream, fileCarveBlock.BlockData); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 		return
 	}
 
@@ -90,19 +100,20 @@ func FileCarveToDisk(w http.ResponseWriter, r *http.Request, cfg *config.Config)
 	if len(FileCarveSessionMap[fileCarveBlock.SessionID].ReceivedBlockIDs) < FileCarveSessionMap[fileCarveBlock.SessionID].totalBlocks {
 		if err := SucessfulUpload(w, false); err != nil {
 			log.Println(err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			w.WriteHeader(http.StatusInternalServerError)
+			io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 			return
 		}
 		return
 	}
-
 	// Close File Stream
 	closeFileStream(FileCarveSessionMap[fileCarveBlock.SessionID].FileStream, fileCarveBlock.SessionID, FileCarveSessionMap)
 
 	// Instruct client sucessful upload
 	if err := SucessfulUpload(w, true); err != nil {
 		log.Println(err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{"error":"%s"}`, err.Error()))
 		return
 	}
 

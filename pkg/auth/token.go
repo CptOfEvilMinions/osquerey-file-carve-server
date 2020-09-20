@@ -34,10 +34,12 @@ func localTokenLookup(tokenAccessor string) bool {
 }
 
 // TokenValdiation performs token validation checks
-func TokenValdiation(tokenAccessor string, token string) error {
+func TokenValdiation(tokenAccessor string, token string, vaultPolicyCheck string) error {
+	var err error
+
 	// Make sure JSON payload has token if not reject
 	if token == "" || tokenAccessor == "" {
-		return errors.New(`{"auth_error":"No token accessor OR token provided"}`)
+		err = errors.New(`{"auth_error": "No token accessor OR token provided"}`)
 	}
 
 	// Check if token accessor is known AND valid
@@ -46,9 +48,15 @@ func TokenValdiation(tokenAccessor string, token string) error {
 	}
 
 	// If token accessor does exit do a lookup on the token
-	if err := vaultTokenLookup(token); err == nil {
+	err = vaultTokenLookup(token, vaultPolicyCheck)
+	if err == nil {
 		return nil
 	}
+
 	// Reject request if it did not pass the checks
-	return errors.New(`{"auth_error": "Token AND token accessor did not pass validation checks"}`)
+	if err == nil {
+		err = errors.New(`{"auth_error": "Token AND token accessor did not pass validation checks"}`)
+	}
+
+	return err
 }

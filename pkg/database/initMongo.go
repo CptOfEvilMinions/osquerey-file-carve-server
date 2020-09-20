@@ -14,7 +14,7 @@ import (
 
 // InitiateMongoClient this function inits the Mongo connector
 // https://www.mongodb.com/blog/post/quick-start-golang--mongodb--a-quick-look-at-gridfs
-func InitiateMongoClient(cfg *config.Config) (*gridfs.Bucket, *mongo.Client) {
+func InitiateMongoClient(cfg *config.Config) (*gridfs.Bucket, *mongo.Client, *mongo.Collection) {
 	log.Printf("[+] - Init Mongo connector")
 
 	var mongoClientConnector *mongo.Client
@@ -45,13 +45,15 @@ func InitiateMongoClient(cfg *config.Config) (*gridfs.Bucket, *mongo.Client) {
 
 	opts := options.Client()
 	opts.ApplyURI(mongoURI)
-	opts.SetMaxPoolSize(5)
-	if mongoClientConnector, err = mongo.Connect(context.Background(), opts); err != nil {
+	opts.SetMaxPoolSize(100)
+
+	mongoClientConnector, err = mongo.Connect(context.Background(), opts)
+	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
 	}
 
-	// Init Mongo GridFS bucket
+	//Init Mongo GridFS bucket
 	mongoBucketConnector, err := gridfs.NewBucket(mongoClientConnector.Database(cfg.Storage.Mongo.Database))
 	if err != nil {
 		log.Fatal(err)
@@ -59,6 +61,10 @@ func InitiateMongoClient(cfg *config.Config) (*gridfs.Bucket, *mongo.Client) {
 	}
 	log.Printf("[+] - Created GridFS bucket for file uploads")
 
+	//Init Mongo Collection connector
+	mongoCollectionConnector := mongoClientConnector.Database(cfg.Storage.Mongo.Database).Collection("fs.files")
+
 	// Return Mongo Bucket Connector
-	return mongoBucketConnector, mongoClientConnector
+	return mongoBucketConnector, mongoClientConnector, mongoCollectionConnector
+
 }

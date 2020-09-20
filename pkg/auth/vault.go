@@ -18,6 +18,7 @@ type vaultTokenLookupResult struct {
 		Token         string    `json:"id"`
 		ExpireTime    time.Time `json:"expire_time"`
 		TokenAccessor string    `json:"accessor"`
+		Policies      []string  `json:"identity_policies"`
 	}
 }
 
@@ -47,7 +48,16 @@ func InitVault(cfg *config.Config) {
 
 }
 
-func vaultTokenLookup(token string) error {
+func vaultTokenPolicyLookup(vaultPolicyCheck string, policies []string) bool {
+	for _, i := range policies {
+		if i == vaultPolicyCheck {
+			return true
+		}
+	}
+	return false
+}
+
+func vaultTokenLookup(token string, vaultPolicyCheck string) error {
 	// Init HTTP client
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: vaultVerifyTLS},
@@ -85,6 +95,11 @@ func vaultTokenLookup(token string) error {
 	// Make sure there are no auth errors
 	if vtResuslt.Error != "" || vtResuslt.Data.Token != token {
 		return fmt.Errorf("Could not validate token: %s", vtResuslt.Error)
+	}
+
+	// Make sure the token has a specific policy
+	if result := vaultTokenPolicyLookup(vaultPolicyCheck, vtResuslt.Data.Policies); result != true {
+		return fmt.Errorf("Token does not have the appropriate identity policy")
 	}
 
 	// Add valid token and expiration date to map
