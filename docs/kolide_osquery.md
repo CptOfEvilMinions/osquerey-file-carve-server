@@ -47,4 +47,9 @@
 1. Within a few seconds the results pane at the bottom should populate with results
 
 ## References
+### Kolide
+* [Configuring The Fleet Binary](https://github.com/kolide/fleet/blob/master/docs/infrastructure/configuring-the-fleet-binary.md)
+* [Kolide Fleet – Breaking out the osquery API & Web UI](https://defensivedepth.com/2020/04/02/kolide-fleet-breaking-out-the-osquery-api-web-ui/)
+* []()
+* []()
 * []()

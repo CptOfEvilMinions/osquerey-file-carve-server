@@ -18,8 +18,8 @@
 ### Block size configuration
 The default setting for all the configs in this repo is to set the data block size at 10MB (10000000 bytes). Osquery has `carver_block_size` set to 10000000 (10MB).
 
-### Generate SSL certs
-
+### Generate your own root CA
+1. [Generate your own root CA](docs/generate_CA.md)
 
 ### Spin up stack
 1. `docker-compose build`
@@ -30,20 +30,14 @@ The default setting for all the configs in this repo is to set the data block si
 1. [Enroll Osquery with Kolide](docs/kolide_osquery.md#Add-Osquery-host-to-Kolide)
 
 
-## Resource stats
-* If the Osquery `carver_block_size` is set to `1000000` (1MB) the osquery-file-carve server will consume roughly 30MB
-* If the Osquery `carver_block_size` is set to `10000000` (10MB) the osquery-file-carve server will consume roughly 140MB
-
-
 ## Tested Osquery versions
 * `osquery version 4.3.0` 
 * `osquery version 4.4.0` 
 
 ## To do
-* Add the ability to clean up unsucessful uploads from Mongo
-  * Files will be deleted at specified clean up interval
-* TravisCI build
-* UML/network diagram
+* Update/finish `docs/*`
+* Update/finish `tests/*`
+* Add the ability to clean up unsucessful uploads
 
 ## Refernces
 ### NGINX
